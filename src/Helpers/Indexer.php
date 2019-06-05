@@ -50,8 +50,17 @@ class Indexer
      */
     private function getIndex(int $seed, string $value, int $size): int
     {
-        $index = $this->hasher->hash($seed, $value);
+        $hash = $this->hasher->hash($seed, $value);
 
-        return $index % $size;
+        // Strip the two's complement negative bit
+        $bitIndex = $hash & (-1 >> 1);
+
+        // If the result has a 1 as its leading bit,
+        // multiply our index by 2 to compensate.
+        if (($hash >> 31) === 1) {
+            $bitIndex *= 2;
+        }
+
+        return $bitIndex % $size;
     }
 }
