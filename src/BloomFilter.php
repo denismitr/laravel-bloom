@@ -3,19 +3,13 @@
 namespace Denismitr\Bloom;
 
 
-use Denismitr\Bloom\Contracts\Bloom;
 use Denismitr\Bloom\Contracts\Hasher;
+use Denismitr\Bloom\Contracts\Persister;
 use Denismitr\Bloom\Helpers\Indexer;
-use Illuminate\Contracts\Redis\Connection;
 use Illuminate\Support\Arr;
 
-class BloomRedisImpl implements Bloom
+class BloomFilter
 {
-    /**
-     * @var Connection
-     */
-    private $redis;
-
     /**
      * @var Hasher
      */
@@ -34,21 +28,25 @@ class BloomRedisImpl implements Bloom
      * @var string
      */
     private $key;
+    /**
+     * @var Persister
+     */
+    private $persister;
 
     /**
      * BloomRedisImpl constructor.
      * @param string $key
      * @param array $config
      * @param Indexer $indexer
-     * @param Connection $redis
+     * @param Persister $persister
      */
-    public function __construct(string $key, array $config, Indexer $indexer, Connection $redis)
+    public function __construct(string $key, array $config, Indexer $indexer, Persister $persister)
     {
-        $this->redis = $redis;
         $this->indexer = $indexer;
         $this->numHashes = Arr::get($config, 'num_hashes', 3);
         $this->size = Arr::get($config, 'size', 100);
         $this->key = $key;
+        $this->persister = $persister;
     }
 
     /**
@@ -59,7 +57,7 @@ class BloomRedisImpl implements Bloom
         $indexes = $this->indexer->getIndexes($this->numHashes, strval($item), $this->size);
 
         $indexes->each(function(int $index) {
-            $this->redis->command("setbit", [$index, 1]);
+            $this->persister->setBit($this->key, $index, true);
         });
     }
 

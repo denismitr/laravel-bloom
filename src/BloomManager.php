@@ -5,8 +5,14 @@ namespace Denismitr\Bloom;
 
 
 use Denismitr\Bloom\Contracts\Bloom;
-use Denismitr\Bloom\Exceptions\InvalidBloomFilterImplementation;
+use Denismitr\Bloom\Contracts\Hasher;
+use Denismitr\Bloom\Contracts\Persister;
+use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistence;
+use Denismitr\Bloom\Exceptions\InvalidHashingAlgorithm;
+use Denismitr\Bloom\Helpers\HasherMD5Impl;
 use Denismitr\Bloom\Helpers\Indexer;
+use Denismitr\Bloom\Helpers\PersisterRedisImpl;
+use Illuminate\Config\Repository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Redis;
 
@@ -19,62 +25,100 @@ final class BloomManager
 
     /**
      * BloomManager constructor.
-     * @param array $config
+     * @param Repository $config
      */
-    public function __construct(array $config)
+    public function __construct(Repository $config)
     {
-        $this->config = $config;
+        $this->config = $config->get('bloom');
     }
 
     /**
      * @param string $key
-     * @return Bloom
+     * @param string|null $keySuffix
+     * @return BloomFilter
+     * @throws InvalidHashingAlgorithm
+     * @throws UnsupportedBloomFilterPersistence
      */
-    public function key(string $key): Bloom
+    public function key(string $key, ?string $keySuffix = null): BloomFilter
     {
-        $implementation = $this->getBloomImplementation($key);
-        $hasher = $this->getHasherImplementation($key);
+        $hasher = $this->resolveHasher($key);
 
-        $indexer = new Indexer(new $hasher());
+        $indexer = new Indexer($hasher);
 
-        $connection = Redis::connection(
-            Arr::get($this->config, 'connection', 'default')
-        );
+        $persister = $this->resolvePersister($key);
 
-        return new $implementation($key, $this->config['default'], $indexer, $connection);
+        return $this->resolveBloomFilter($key, $indexer, $persister);
     }
 
     /**
      * @param string $key
-     * @return string
+     * @param Indexer $indexer
+     * @param Persister $persister
+     * @return BloomFilter
      */
-    private function getBloomImplementation(string $key): string
+    private function resolveBloomFilter(
+        string $key,
+        Indexer $indexer,
+        Persister $persister
+    ): BloomFilter
     {
-        $implementation = Arr::get($this->config, 'implementation');
+        $config = $this->resolveKeySpecificConfig($key);
 
-        if ( ! is_a($implementation, Bloom::class) ) {
-            InvalidBloomFilterImplementation::because(
-                get_class($implementation) . ' does not implement ' . Bloom::class . ' interface'
-            );
+        return new BloomFilter($key, $config, $indexer, $persister);
+    }
+
+    /**
+     * @param string $key
+     * @return Hasher
+     * @throws InvalidHashingAlgorithm
+     */
+    private function resolveHasher(string $key): Hasher
+    {
+        $config = $this->resolveKeySpecificConfig($key);
+
+        $algorithm = Arr::get($config, 'hashing_algorithm');
+
+        switch ($algorithm) {
+            case 'md5':
+                return new HasherMD5Impl();
+            default:
+                throw InvalidHashingAlgorithm::because(
+                    'Hashing algorithm must be one of following: md5'
+                );
         }
-
-        return $implementation;
     }
 
     /**
      * @param string $key
-     * @return string
+     * @return Persister
+     * @throws UnsupportedBloomFilterPersistence
      */
-    private function getHasherImplementation(string $key): string
+    private function resolvePersister(string $key): Persister
     {
-        $hasher = Arr::get($this->config, 'hasher');
+        $config = $this->resolveKeySpecificConfig($key);
 
-        if ( ! is_a($hasher, Bloom::class) ) {
-            InvalidBloomFilterImplementation::because(
-                get_class($hasher) . ' does not implement ' . Bloom::class . ' interface'
-            );
+        $persistance = Arr::get($config, 'persistence');
+
+        switch ($persistance) {
+            case 'redis':
+                $connection = Redis::connection(
+                    Arr::get($this->config, 'connection', 'default')
+                );
+
+                return new PersisterRedisImpl($connection);
+            default:
+                throw UnsupportedBloomFilterPersistence::because(
+                    "Only redis driver is supported so far"
+                );
         }
+    }
 
-        return $hasher;
+    /**
+     * @param string $key
+     * @return array
+     */
+    private function resolveKeySpecificConfig(string $key): array
+    {
+        return $this->config["keys.{$key}"] ?? $this->config['default'];
     }
 }

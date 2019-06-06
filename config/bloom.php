@@ -5,9 +5,9 @@ return [
         'size' => 100000,
         'num_hashes' => 5,
 
-        'implementation' => \Denismitr\Bloom\BloomRedisImpl::class,
+        'persistence' => 'redis',
 
-        'hasher' => \Denismitr\Bloom\Helpers\HasherMD5Impl::class,
+        'hashing_algorithm' => 'md5',
     ],
 
     'keys' => [],

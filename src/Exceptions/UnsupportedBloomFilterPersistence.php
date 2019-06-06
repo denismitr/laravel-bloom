@@ -4,10 +4,10 @@
 namespace Denismitr\Bloom\Exceptions;
 
 
-class InvalidHasherImplementation extends BloomServiceException
+class UnsupportedBloomFilterPersistence extends BloomServiceException
 {
     public static function because(string $message): self
     {
         return new static($message);
-    }
+    } 
 }
