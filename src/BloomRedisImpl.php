@@ -30,19 +30,25 @@ class BloomRedisImpl implements Bloom
      * @var mixed
      */
     private $size;
+    /**
+     * @var string
+     */
+    private $key;
 
     /**
      * BloomRedisImpl constructor.
+     * @param string $key
      * @param array $config
      * @param Indexer $indexer
      * @param Connection $redis
      */
-    public function __construct(array $config, Indexer $indexer, Connection $redis)
+    public function __construct(string $key, array $config, Indexer $indexer, Connection $redis)
     {
         $this->redis = $redis;
         $this->indexer = $indexer;
         $this->numHashes = Arr::get($config, 'num_hashes', 3);
         $this->size = Arr::get($config, 'size', 100);
+        $this->key = $key;
     }
 
     /**
