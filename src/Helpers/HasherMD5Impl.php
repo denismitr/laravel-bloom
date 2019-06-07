@@ -14,7 +14,7 @@ class HasherMD5Impl implements Hasher
      */
     public function hash(int $seed, string $value): int
     {
-        $input = sprintf("%d__%S", $seed, $value);
+        $input = sprintf("%d__%s", $seed, $value);
 
         return abs( crc32( md5($input) ) );
     }

@@ -2,7 +2,7 @@
 
 return [
     'default' => [
-        'size' => 100000,
+        'size' => 10000000,
         'num_hashes' => 5,
 
         'persistence' => 'redis',

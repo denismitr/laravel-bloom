@@ -6,7 +6,6 @@ namespace Denismitr\Bloom\Tests;
 
 use Denismitr\Bloom\BloomManager;
 use Denismitr\Bloom\BloomFilter;
-use Denismitr\Bloom\Contracts\Bloom;
 
 class BloomManagerTest extends TestCase
 {

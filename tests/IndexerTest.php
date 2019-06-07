@@ -44,9 +44,9 @@ class IndexerTest extends TestCase
     public function md5HasherDataProvider(): array
     {
         return [
-            [5, "123", 30, [8, 8, 0, 1, 10]],
-            [5, "123", 35, [28, 8, 5, 21, 0]],
-            [5, "Test Title", 3000, [2588, 2678, 330, 1981, 640]],
+            [5, "123", 30, [20, 11, 23, 16, 11]],
+            [5, "123", 35, [5, 11, 18, 6, 1]],
+            [5, "Test Title", 3000, [1531, 2340, 1656, 432, 1046]],
         ];
     }
 }

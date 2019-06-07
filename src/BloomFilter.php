@@ -50,7 +50,7 @@ class BloomFilter
     }
 
     /**
-     * @param mixed $item
+     * @param string|integer|float $item
      */
     public function add($item): void
     {
@@ -61,8 +61,20 @@ class BloomFilter
         });
     }
 
+    /**
+     * @param string|integer|float $item
+     * @return bool
+     */
     public function test($item): bool
     {
-        // TODO: Implement test() method.
+        $indexes = $this->indexer->getIndexes($this->numHashes, strval($item), $this->size);
+
+        foreach ($indexes as $index) {
+            if ( true !== $this->persister->getBit($this->key, $index) ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

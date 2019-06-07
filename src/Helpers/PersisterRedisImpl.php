@@ -30,7 +30,7 @@ final class PersisterRedisImpl implements Persister
 
     public function getBit(string $key, int $index): bool
     {
-        // TODO: Implement getBit() method.
+        return !! $this->redis->command("getbit", [$key, $index]);
     }
 
 }

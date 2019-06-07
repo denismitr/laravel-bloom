@@ -24,8 +24,8 @@ class BloomServiceProvider extends ServiceProvider
 
     protected function registerBloomManager()
     {
-        $this->app->singleton('bloom', function($app) {
-            return new BloomManager($app['config']['bloom']);
+        $this->app->singleton('bloom.manager', function($app) {
+            return new BloomManager($app['config']);
         });
     }
 }
