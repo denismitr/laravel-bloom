@@ -1,8 +1,16 @@
 {
     "name": "denismitr/laravel-bloom",
-    "description": "Bloom filters for Laravel",
+    "description": "Bloom filter implementation for Laravel based on Redis",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "denismitr",
+        "laravel",
+        "probabilistic",
+        "data-structures",
+        "bloom",
+        "bloom-filter"
+    ],
     "authors": [
         {
             "name": "Denis Mitrofanov",
@@ -11,19 +19,25 @@
     ],
     "require": {
         "php": "^7.2",
-        "illuminate/support": "^5.8",
-        "illuminate/contracts": "^5.8",
-        "illuminate/redis": "^5.8",
+        "illuminate/support": "~5.8",
+        "illuminate/contracts": "~5.8",
+        "illuminate/redis": "~5.8",
         "predis/predis": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.1",
-        "orchestra/testbench": "^3.8"
+        "orchestra/testbench": "~3.8"
     },
     "autoload": {
         "psr-4": {
             "Denismitr\\Bloom\\": "src"
         }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
     },
     "autoload-dev": {
         "psr-4": {
