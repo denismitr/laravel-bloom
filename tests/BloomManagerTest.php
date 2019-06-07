@@ -27,7 +27,6 @@ class BloomManagerTest extends TestCase
     {
         $bloomRedisImpl = resolve(BloomManager::class)->key('hello');
 
-        $this->assertInstanceOf(Bloom::class, $bloomRedisImpl);
         $this->assertInstanceOf(BloomFilter::class, $bloomRedisImpl);
     }
 }
