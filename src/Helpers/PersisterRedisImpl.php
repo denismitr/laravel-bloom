@@ -5,7 +5,7 @@ namespace Denismitr\Bloom\Helpers;
 
 
 use Denismitr\Bloom\Contracts\Persister;
-use Illuminate\Contracts\Redis\Connection;
+use Illuminate\Redis\Connections\Connection;
 
 final class PersisterRedisImpl implements Persister
 {
@@ -23,14 +23,32 @@ final class PersisterRedisImpl implements Persister
         $this->redis = $redis;
     }
 
-    public function setBit(string $key, int $index, bool $value): void
+    /**
+     * @param string $key
+     * @param Indexes $indexes
+     */
+    public function setBits(string $key, Indexes $indexes): void
     {
-        $this->redis->command("setbit", [$key, $index, 1]);
+        $this->redis->transaction(function ($client) use ($key, $indexes) {
+            foreach ($indexes->get() as $index) {
+                $client->setbit($key, $index, 1);
+            }
+        });
     }
 
-    public function getBit(string $key, int $index): bool
+    /**
+     * @param string $key
+     * @param Indexes $indexes
+     * @return Bits
+     */
+    public function getBits(string $key, Indexes $indexes): Bits
     {
-        return !! $this->redis->command("getbit", [$key, $index]);
-    }
+        $responses = $this->redis->transaction(function ($client) use ($key, $indexes) {
+            foreach ($indexes->get() as $index) {
+                $client->getbit($key, $index);
+            }
+        });
 
+        return new Bits($responses);
+    }
 }

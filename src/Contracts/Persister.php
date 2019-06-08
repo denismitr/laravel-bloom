@@ -4,9 +4,12 @@
 namespace Denismitr\Bloom\Contracts;
 
 
+use Denismitr\Bloom\Helpers\Indexes;
+use Denismitr\Bloom\Helpers\Bits;
+
 interface Persister
 {
-    public function setBit(string $key, int $index, bool $value): void;
+    public function setBits(string $key, Indexes $multi): void;
 
-    public function getBit(string $key, int $index): bool;
+    public function getBits(string $key, Indexes $multi): Bits;
 }

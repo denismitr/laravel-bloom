@@ -38,10 +38,15 @@ class BloomFilterTest extends TestCase
     public function it_can_verify_stored_single_result($item)
     {
         Bloom::key('user-recommendations')->add($item);
-        $this->assertTrue(Bloom::key('user-recommendations')->test($item));
+
+        $this->assertTrue(
+            Bloom::key('user-recommendations')->test($item),
+            "Given item {$item} not found in Bloom filter"
+        );
 
         $this->assertFalse(
-            Bloom::key('user-recommendations')->test('definitely-wrong-value')
+            Bloom::key('user-recommendations')->test('definitely-wrong-value'),
+            "Wrong key found in the Bloom filter"
         );
     }
 

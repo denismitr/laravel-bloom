@@ -36,9 +36,9 @@ class IndexerTest extends TestCase
 
         $this->assertCount($numHashes, $indexes);
 
-        $indexes->each(function(int $index, int $key) use ($expectedIndexes) {
+        foreach ($indexes->get() as $key=>$index) {
             $this->assertEquals($expectedIndexes[$key], $index);
-        });
+        }
     }
 
     public function md5HasherDataProvider(): array

@@ -56,9 +56,7 @@ class BloomFilter
     {
         $indexes = $this->indexer->getIndexes($this->numHashes, strval($item), $this->size);
 
-        $indexes->each(function(int $index) {
-            $this->persister->setBit($this->key, $index, true);
-        });
+        $this->persister->setBits($this->key, $indexes);
     }
 
     /**
@@ -69,12 +67,6 @@ class BloomFilter
     {
         $indexes = $this->indexer->getIndexes($this->numHashes, strval($item), $this->size);
 
-        foreach ($indexes as $index) {
-            if ( true !== $this->persister->getBit($this->key, $index) ) {
-                return false;
-            }
-        }
-
-        return true;
+        return $this->persister->getBits($this->key, $indexes)->test();
     }
 }

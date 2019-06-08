@@ -28,11 +28,11 @@ class Indexer
      * @param int $numHashes
      * @param string $value
      * @param int $size
-     * @return Collection
+     * @return Indexes
      */
-    public function getIndexes(int $numHashes, string $value, int $size): Collection
+    public function getIndexes(int $numHashes, string $value, int $size): Indexes
     {
-        $indexes = collect([]);
+        $indexes = new Indexes();
 
         for ($i = 1; $i <= $numHashes; $i++) {
             $indexes->push(
