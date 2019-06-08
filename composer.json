@@ -36,6 +36,7 @@
     "config": {
         "sort-packages": true
     },
+    "prefer-stable": true,
     "scripts": {
         "test": "vendor/bin/phpunit"
     },
