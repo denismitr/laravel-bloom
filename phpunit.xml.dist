@@ -22,4 +22,7 @@
     <php>
         <env name="APP_NAME" value="laravel-bloom"/>
     </php>
+    <logging>
+        <log type="coverage-html" target="./reports" lowUpperBound="50" highLowerBound="80"/>
+    </logging>
 </phpunit>
