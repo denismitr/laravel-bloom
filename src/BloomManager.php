@@ -119,6 +119,6 @@ final class BloomManager
      */
     private function resolveKeySpecificConfig(string $key): array
     {
-        return $this->config["keys.{$key}"] ?? $this->config['default'];
+        return Arr::get($this->config, "keys.{$key}", $this->config['default']);
     }
 }

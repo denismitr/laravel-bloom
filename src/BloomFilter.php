@@ -21,13 +21,15 @@ class BloomFilter
     private $numHashes;
 
     /**
-     * @var mixed
+     * @var int
      */
     private $size;
+
     /**
      * @var string
      */
     private $key;
+
     /**
      * @var Persister
      */
@@ -68,5 +70,21 @@ class BloomFilter
         $indexes = $this->indexer->getIndexes($this->numHashes, strval($item), $this->size);
 
         return $this->persister->getBits($this->key, $indexes)->test();
+    }
+
+    /**
+     * @return int
+     */
+    public function getNumHashes(): int
+    {
+        return $this->numHashes;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSize(): int
+    {
+        return $this->size;
     }
 }
