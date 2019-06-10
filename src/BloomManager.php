@@ -4,9 +4,7 @@
 namespace Denismitr\Bloom;
 
 
-use Denismitr\Bloom\Contracts\Bloom;
-use Denismitr\Bloom\Contracts\Hasher;
-use Denismitr\Bloom\Contracts\Persister;
+use Denismitr\Bloom\Contracts\{Bloom, Hasher, Persister};
 use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
 use Denismitr\Bloom\Exceptions\UnsupportedHashingAlgorithm;
 use Denismitr\Bloom\Helpers\HasherMD5Impl;

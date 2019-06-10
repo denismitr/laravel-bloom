@@ -50,6 +50,22 @@ class BloomFilterTest extends TestCase
         );
     }
 
+    /**
+     * @test
+     */
+    public function it_can_reset_a_given_key()
+    {
+        $bloomFilter = Bloom::key('key-in-need-of-reset');
+
+        $bloomFilter->add(155);
+
+        $this->assertTrue($bloomFilter->test(155));
+
+        $bloomFilter->reset();
+
+        $this->assertFalse($bloomFilter->test(155));
+    }
+
     public function singleItemsToStore(): array
     {
         return [

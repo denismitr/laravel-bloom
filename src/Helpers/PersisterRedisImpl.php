@@ -51,4 +51,12 @@ final class PersisterRedisImpl implements Persister
 
         return new Bits($responses);
     }
+
+    /**
+     * @param string $key
+     */
+    public function reset(string $key): void
+    {
+        $this->redis->del([$key]);
+    }
 }

@@ -45,8 +45,8 @@ class BloomFilter
     public function __construct(string $key, array $config, Indexer $indexer, Persister $persister)
     {
         $this->indexer = $indexer;
-        $this->numHashes = Arr::get($config, 'num_hashes', 3);
-        $this->size = Arr::get($config, 'size', 100);
+        $this->numHashes = Arr::get($config, 'num_hashes', 5);
+        $this->size = Arr::get($config, 'size', 10000000);
         $this->key = $key;
         $this->persister = $persister;
     }
@@ -70,6 +70,11 @@ class BloomFilter
         $indexes = $this->indexer->getIndexes($this->numHashes, strval($item), $this->size);
 
         return $this->persister->getBits($this->key, $indexes)->test();
+    }
+
+    public function reset(): void
+    {
+        $this->persister->reset($this->key);
     }
 
     /**
