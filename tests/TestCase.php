@@ -18,6 +18,8 @@ abstract class TestCase extends Orchestra
             'persistence' => 'redis',
             'hashing_algorithm' => 'md5',
         ]);
+
+        config()->set('bloom.keys', []);
     }
 
     protected function getPackageProviders($app)

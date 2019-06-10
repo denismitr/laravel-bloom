@@ -5,6 +5,8 @@ namespace Denismitr\Bloom;
 
 use Denismitr\Bloom\Contracts\Hasher;
 use Denismitr\Bloom\Contracts\Persister;
+use Denismitr\Bloom\Exceptions\InvalidBloomFilterHashFunctionsNumber;
+use Denismitr\Bloom\Exceptions\InvalidBloomFilterSize;
 use Denismitr\Bloom\Helpers\Indexer;
 use Illuminate\Support\Arr;
 
@@ -41,12 +43,16 @@ class BloomFilter
      * @param array $config
      * @param Indexer $indexer
      * @param Persister $persister
+     * @throws InvalidBloomFilterSize
+     * @throws InvalidBloomFilterHashFunctionsNumber
      */
     public function __construct(string $key, array $config, Indexer $indexer, Persister $persister)
     {
         $this->indexer = $indexer;
-        $this->numHashes = Arr::get($config, 'num_hashes', 5);
-        $this->size = Arr::get($config, 'size', 10000000);
+
+        $this->numHashes = $this->validatedNumHashes(Arr::get($config, 'num_hashes', 5));
+        $this->size = $this->validatedSize(Arr::get($config, 'size', 10000000));
+
         $this->key = $key;
         $this->persister = $persister;
     }
@@ -91,5 +97,33 @@ class BloomFilter
     public function getSize(): int
     {
         return $this->size;
+    }
+
+    /**
+     * @param $size
+     * @return int
+     * @throws InvalidBloomFilterSize
+     */
+    private function validatedSize($size): int
+    {
+        if ( ! is_integer($size) || $size <= 0) {
+            throw InvalidBloomFilterSize::size($size);
+        }
+
+        return intval($size);
+    }
+
+    /**
+     * @param $num
+     * @return int
+     * @throws InvalidBloomFilterHashFunctionsNumber
+     */
+    private function validatedNumHashes($num): int
+    {
+        if ( ! is_integer($num) || $num <= 0) {
+            throw InvalidBloomFilterHashFunctionsNumber::number($num);
+        }
+
+        return intval($num);
     }
 }

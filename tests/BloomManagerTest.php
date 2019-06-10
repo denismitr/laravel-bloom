@@ -6,6 +6,9 @@ namespace Denismitr\Bloom\Tests;
 
 use Denismitr\Bloom\BloomManager;
 use Denismitr\Bloom\BloomFilter;
+use Denismitr\Bloom\Exceptions\BloomServiceException;
+use Denismitr\Bloom\Exceptions\InvalidBloomFilterHashFunctionsNumber;
+use Denismitr\Bloom\Exceptions\InvalidBloomFilterSize;
 use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
 use Denismitr\Bloom\Exceptions\UnsupportedHashingAlgorithm;
 use Denismitr\Bloom\Facades\Bloom;
@@ -67,6 +70,7 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(UnsupportedBloomFilterPersistenceDriver::class);
+        $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage('Bloom filter persistence driver [invalid] is not supported.');
 
         Bloom::key('some-key');
@@ -75,7 +79,26 @@ class BloomManagerTest extends TestCase
     /**
      * @test
      */
-    public function it_throws_if_hashing_algorithm_is_unsupported()
+    public function it_throws_if_key_specific_persistence_driver_is_unsupported()
+    {
+        config()->set('bloom.keys.some-specific-key', [
+            'size' => 333000,
+            'num_hashes' => 3,
+            'persistence' => 'mysql',
+            'hashing_algorithm' => 'md5',
+        ]);
+
+        $this->expectException(UnsupportedBloomFilterPersistenceDriver::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage('Bloom filter persistence driver [mysql] is not supported.');
+
+        Bloom::key('some-specific-key');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_if_default_hashing_algorithm_is_unsupported()
     {
         config()->set('bloom.default', [
             'size' => 333000,
@@ -85,8 +108,104 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(UnsupportedHashingAlgorithm::class);
+        $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage("Unsupported hashing algorithm: sha256.");
 
         Bloom::key('some-other-key');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_if_key_specific_hashing_algorithm_is_unsupported()
+    {
+        config()->set('bloom.keys.specific', [
+            'size' => 333000,
+            'num_hashes' => 3,
+            'persistence' => 'redis',
+            'hashing_algorithm' => 'sha512',
+        ]);
+
+        $this->expectException(UnsupportedHashingAlgorithm::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage("Unsupported hashing algorithm: sha512.");
+
+        Bloom::key('specific');
+    }
+    
+    /**
+     * @test
+     */
+    public function it_throws_if_default_price_is_not_an_unsigned_integer()
+    {
+        config()->set('bloom.default', [
+            'size' => -333,
+            'num_hashes' => 3,
+            'persistence' => 'redis',
+            'hashing_algorithm' => 'md5',
+        ]);
+
+        $this->expectException(InvalidBloomFilterSize::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage("Size must be a positive integer: value [-333] is invalid.");
+
+        Bloom::key('any-key');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_if_key_specific_price_is_not_an_unsigned_integer()
+    {
+        config()->set('bloom.keys.specific', [
+            'size' => 'boo',
+            'num_hashes' => 3,
+            'persistence' => 'redis',
+            'hashing_algorithm' => 'md5',
+        ]);
+
+        $this->expectException(InvalidBloomFilterSize::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage("Size must be a positive integer: value [boo] is invalid.");
+
+        Bloom::key('specific');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_if_default_number_of_hash_functions_is_not_a_positive_integer()
+    {
+        config()->set('bloom.default', [
+            'size' => 300,
+            'num_hashes' => 0,
+            'persistence' => 'redis',
+            'hashing_algorithm' => 'md5',
+        ]);
+
+        $this->expectException(InvalidBloomFilterHashFunctionsNumber::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage("Number of hash functions must be a positive integer: value [0] is invalid.");
+
+        Bloom::key('some-key');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_if_key_specific_number_of_hash_functions_is_not_a_positive_integer()
+    {
+        config()->set('bloom.keys.specific', [
+            'size' => 300,
+            'num_hashes' => 'foo',
+            'persistence' => 'redis',
+            'hashing_algorithm' => 'md5',
+        ]);
+
+        $this->expectException(InvalidBloomFilterHashFunctionsNumber::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage("Number of hash functions must be a positive integer: value [foo] is invalid.");
+
+        Bloom::key('specific');
     }
 }
