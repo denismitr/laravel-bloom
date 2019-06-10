@@ -12,14 +12,9 @@ abstract class TestCase extends Orchestra
     {
         parent::setUp();
 
-        config()->set('bloom.default', [
-            'size' => 10000000,
-            'num_hashes' => 5,
-            'persistence' => 'redis',
-            'hashing_algorithm' => 'md5',
-        ]);
+        $config = require __DIR__ . './../config/bloom.php';
 
-        config()->set('bloom.keys', []);
+        config()->set('bloom', $config);
     }
 
     protected function getPackageProviders($app)

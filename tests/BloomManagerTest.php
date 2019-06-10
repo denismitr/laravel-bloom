@@ -44,7 +44,10 @@ class BloomManagerTest extends TestCase
             'user_recommendations' => [
                 'size' => 550,
                 'num_hashes' => 10,
-                'persistence' => 'redis',
+                'persistence' => [
+                    'driver' => 'redis',
+                    'connection' => 'default'
+                ],
                 'hashing_algorithm' => 'md5',
             ]
         ]);
@@ -71,7 +74,7 @@ class BloomManagerTest extends TestCase
 
         $this->expectException(UnsupportedBloomFilterPersistenceDriver::class);
         $this->expectException(BloomServiceException::class);
-        $this->expectExceptionMessage('Bloom filter persistence driver [invalid] is not supported.');
+        $this->expectExceptionMessage('Bloom filter persistence driver [NULL] is not supported.');
 
         Bloom::key('some-key');
     }
@@ -84,7 +87,10 @@ class BloomManagerTest extends TestCase
         config()->set('bloom.keys.some-specific-key', [
             'size' => 333000,
             'num_hashes' => 3,
-            'persistence' => 'mysql',
+            'persistence' => [
+                'driver' => 'mysql',
+                'connection' => 'default'
+            ],
             'hashing_algorithm' => 'md5',
         ]);
 
@@ -103,7 +109,10 @@ class BloomManagerTest extends TestCase
         config()->set('bloom.default', [
             'size' => 333000,
             'num_hashes' => 3,
-            'persistence' => 'redis',
+            'persistence' => [
+                'driver' => 'redis',
+                'connection' => 'default'
+            ],
             'hashing_algorithm' => 'sha256',
         ]);
 
@@ -122,7 +131,10 @@ class BloomManagerTest extends TestCase
         config()->set('bloom.keys.specific', [
             'size' => 333000,
             'num_hashes' => 3,
-            'persistence' => 'redis',
+            'persistence' => [
+                'driver' => 'redis',
+                'connection' => 'default'
+            ],
             'hashing_algorithm' => 'sha512',
         ]);
 
@@ -141,7 +153,10 @@ class BloomManagerTest extends TestCase
         config()->set('bloom.default', [
             'size' => -333,
             'num_hashes' => 3,
-            'persistence' => 'redis',
+            'persistence' => [
+                'driver' => 'redis',
+                'connection' => 'default'
+            ],
             'hashing_algorithm' => 'md5',
         ]);
 
@@ -160,7 +175,10 @@ class BloomManagerTest extends TestCase
         config()->set('bloom.keys.specific', [
             'size' => 'boo',
             'num_hashes' => 3,
-            'persistence' => 'redis',
+            'persistence' => [
+                'driver' => 'redis',
+                'connection' => 'default'
+            ],
             'hashing_algorithm' => 'md5',
         ]);
 
@@ -179,7 +197,10 @@ class BloomManagerTest extends TestCase
         config()->set('bloom.default', [
             'size' => 300,
             'num_hashes' => 0,
-            'persistence' => 'redis',
+            'persistence' => [
+                'driver' => 'redis',
+                'connection' => 'default'
+            ],
             'hashing_algorithm' => 'md5',
         ]);
 
@@ -198,7 +219,10 @@ class BloomManagerTest extends TestCase
         config()->set('bloom.keys.specific', [
             'size' => 300,
             'num_hashes' => 'foo',
-            'persistence' => 'redis',
+            'persistence' => [
+                'driver' => 'redis',
+                'connection' => 'default'
+            ],
             'hashing_algorithm' => 'md5',
         ]);
 

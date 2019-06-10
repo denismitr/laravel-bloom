@@ -53,6 +53,8 @@ final class BloomManager
      * @param Indexer $indexer
      * @param Persister $persister
      * @return BloomFilter
+     * @throws Exceptions\InvalidBloomFilterHashFunctionsNumber
+     * @throws Exceptions\InvalidBloomFilterSize
      */
     private function resolveBloomFilter(
         string $key,
@@ -80,7 +82,7 @@ final class BloomManager
             case 'md5':
                 return new HasherMD5Impl();
             default:
-                throw UnsupportedHashingAlgorithm::algorithm($algorithm);
+                throw UnsupportedHashingAlgorithm::algorithm(strval($algorithm));
         }
     }
 
@@ -93,15 +95,14 @@ final class BloomManager
     {
         $config = $this->resolveKeySpecificConfig($key);
 
-        $driver = Arr::get($config, 'persistence');
+        $driver = Arr::get($config, 'persistence.driver');
+        $connection = Arr::get($config, 'persistence.connection');
 
         switch ($driver) {
             case 'redis':
-                $connection = Redis::connection(
-                    Arr::get($this->config, 'connection', 'default')
-                );
+                $conn= Redis::connection($connection);
 
-                return new PersisterRedisImpl($connection);
+                return new PersisterRedisImpl($conn);
             default:
                 throw UnsupportedBloomFilterPersistenceDriver::driver($driver);
         }
