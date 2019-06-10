@@ -6,6 +6,8 @@ namespace Denismitr\Bloom\Tests;
 
 use Denismitr\Bloom\BloomManager;
 use Denismitr\Bloom\BloomFilter;
+use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
+use Denismitr\Bloom\Exceptions\UnsupportedHashingAlgorithm;
 use Denismitr\Bloom\Facades\Bloom;
 
 class BloomManagerTest extends TestCase
@@ -50,5 +52,41 @@ class BloomManagerTest extends TestCase
 
         $this->assertEquals(550, $bloomFilter->getSize());
         $this->assertEquals(10, $bloomFilter->getNumHashes());
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_if_default_persistence_driver_is_unsupported()
+    {
+        config()->set('bloom.default', [
+            'size' => 333000,
+            'num_hashes' => 3,
+            'persistence' => 'invalid',
+            'hashing_algorithm' => 'md5',
+        ]);
+
+        $this->expectException(UnsupportedBloomFilterPersistenceDriver::class);
+        $this->expectExceptionMessage('Bloom filter persistence driver [invalid] is not supported.');
+
+        Bloom::key('some-key');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_if_hashing_algorithm_is_unsupported()
+    {
+        config()->set('bloom.default', [
+            'size' => 333000,
+            'num_hashes' => 3,
+            'persistence' => 'redis',
+            'hashing_algorithm' => 'sha256',
+        ]);
+
+        $this->expectException(UnsupportedHashingAlgorithm::class);
+        $this->expectExceptionMessage("Unsupported hashing algorithm: sha256.");
+
+        Bloom::key('some-other-key');
     }
 }

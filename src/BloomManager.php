@@ -7,8 +7,8 @@ namespace Denismitr\Bloom;
 use Denismitr\Bloom\Contracts\Bloom;
 use Denismitr\Bloom\Contracts\Hasher;
 use Denismitr\Bloom\Contracts\Persister;
-use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistence;
-use Denismitr\Bloom\Exceptions\InvalidHashingAlgorithm;
+use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
+use Denismitr\Bloom\Exceptions\UnsupportedHashingAlgorithm;
 use Denismitr\Bloom\Helpers\HasherMD5Impl;
 use Denismitr\Bloom\Helpers\Indexer;
 use Denismitr\Bloom\Helpers\PersisterRedisImpl;
@@ -36,8 +36,8 @@ final class BloomManager
      * @param string $key
      * @param string|null $keySuffix
      * @return BloomFilter
-     * @throws InvalidHashingAlgorithm
-     * @throws UnsupportedBloomFilterPersistence
+     * @throws UnsupportedHashingAlgorithm
+     * @throws UnsupportedBloomFilterPersistenceDriver
      */
     public function key(string $key, ?string $keySuffix = null): BloomFilter
     {
@@ -70,7 +70,7 @@ final class BloomManager
     /**
      * @param string $key
      * @return Hasher
-     * @throws InvalidHashingAlgorithm
+     * @throws UnsupportedHashingAlgorithm
      */
     private function resolveHasher(string $key): Hasher
     {
@@ -82,24 +82,22 @@ final class BloomManager
             case 'md5':
                 return new HasherMD5Impl();
             default:
-                throw InvalidHashingAlgorithm::because(
-                    'Hashing algorithm must be one of following: md5'
-                );
+                throw UnsupportedHashingAlgorithm::algorithm($algorithm);
         }
     }
 
     /**
      * @param string $key
      * @return Persister
-     * @throws UnsupportedBloomFilterPersistence
+     * @throws UnsupportedBloomFilterPersistenceDriver
      */
     private function resolvePersister(string $key): Persister
     {
         $config = $this->resolveKeySpecificConfig($key);
 
-        $persistance = Arr::get($config, 'persistence');
+        $driver = Arr::get($config, 'persistence');
 
-        switch ($persistance) {
+        switch ($driver) {
             case 'redis':
                 $connection = Redis::connection(
                     Arr::get($this->config, 'connection', 'default')
@@ -107,9 +105,7 @@ final class BloomManager
 
                 return new PersisterRedisImpl($connection);
             default:
-                throw UnsupportedBloomFilterPersistence::because(
-                    "Only redis driver is supported so far"
-                );
+                throw UnsupportedBloomFilterPersistenceDriver::driver($driver);
         }
     }
 
