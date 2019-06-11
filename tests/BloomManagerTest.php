@@ -74,7 +74,7 @@ class BloomManagerTest extends TestCase
 
         $this->expectException(UnsupportedBloomFilterPersistenceDriver::class);
         $this->expectException(BloomServiceException::class);
-        $this->expectExceptionMessage('Bloom filter persistence driver [NULL] is not supported.');
+        $this->expectExceptionMessage('Bloom filter persistence driver must be a string, but [NULL] was given.');
 
         Bloom::key('some-key');
     }

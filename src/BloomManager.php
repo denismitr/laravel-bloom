@@ -4,16 +4,19 @@
 namespace Denismitr\Bloom;
 
 
-use Denismitr\Bloom\Contracts\{Hasher, Persister};
+use Denismitr\Bloom\Contracts\{Persister};
 use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
 use Denismitr\Bloom\Exceptions\UnsupportedHashingAlgorithm;
-use Denismitr\Bloom\Helpers\HasherMD5Impl;
+use Denismitr\Bloom\Factories\HasherFactory;
+use Denismitr\Bloom\Factories\PersisterFactory;
 use Denismitr\Bloom\Helpers\Indexer;
-use Denismitr\Bloom\Helpers\PersisterRedisImpl;
 use Illuminate\Config\Repository;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Redis;
 
+/**
+ * Class BloomManager
+ * @package Denismitr\Bloom
+ */
 final class BloomManager
 {
     /**
@@ -22,12 +25,30 @@ final class BloomManager
     private $config;
 
     /**
+     * @var PersisterFactory
+     */
+    private $persisterFactory;
+
+    /**
+     * @var HasherFactory
+     */
+    private $hasherFactory;
+
+    /**
      * BloomManager constructor.
      * @param Repository $config
+     * @param PersisterFactory $persisterFactory
+     * @param HasherFactory $hasherFactory
      */
-    public function __construct(Repository $config)
+    public function __construct(
+        Repository $config,
+        PersisterFactory $persisterFactory,
+        HasherFactory $hasherFactory
+    )
     {
         $this->config = $config->get('bloom');
+        $this->persisterFactory = $persisterFactory;
+        $this->hasherFactory = $hasherFactory;
     }
 
     /**
@@ -41,11 +62,10 @@ final class BloomManager
      */
     public function key(string $key, ?string $keySuffix = null): BloomFilter
     {
-        $hasher = $this->resolveHasher($key);
+        $config = $this->resolveKeySpecificConfig($key);
 
-        $indexer = new Indexer($hasher);
-
-        $persister = $this->resolvePersister($key);
+        $indexer = $this->resolveIndexer($config);
+        $persister = $this->resolvePersister($config);
 
         return $this->resolveBloomFilter($key, $keySuffix, $indexer, $persister);
     }
@@ -74,44 +94,30 @@ final class BloomManager
     }
 
     /**
-     * @param string $key
-     * @return Hasher
+     * @param array $config
+     * @return Indexer
      * @throws UnsupportedHashingAlgorithm
      */
-    private function resolveHasher(string $key): Hasher
+    private function resolveIndexer(array $config): Indexer
     {
-        $config = $this->resolveKeySpecificConfig($key);
-
         $algorithm = Arr::get($config, 'hashing_algorithm');
 
-        switch ($algorithm) {
-            case 'md5':
-                return new HasherMD5Impl();
-            default:
-                throw UnsupportedHashingAlgorithm::algorithm(strval($algorithm));
-        }
+        $hasher = $this->hasherFactory->make($algorithm);
+
+        return new Indexer($hasher);
     }
 
     /**
-     * @param string $key
+     * @param array $config
      * @return Persister
      * @throws UnsupportedBloomFilterPersistenceDriver
      */
-    private function resolvePersister(string $key): Persister
+    private function resolvePersister(array $config): Persister
     {
-        $config = $this->resolveKeySpecificConfig($key);
-
         $driver = Arr::get($config, 'persistence.driver');
-        $connection = Arr::get($config, 'persistence.connection');
+        $connection = Arr::get($config, 'persistence.connection', 'default');
 
-        switch ($driver) {
-            case 'redis':
-                $conn= Redis::connection($connection);
-
-                return new PersisterRedisImpl($conn);
-            default:
-                throw UnsupportedBloomFilterPersistenceDriver::driver($driver);
-        }
+        return $this->persisterFactory->make($driver, $connection);
     }
 
     /**

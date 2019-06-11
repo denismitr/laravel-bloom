@@ -15,7 +15,7 @@ return [
          // keys specific params
          // example
 //        'user_recommendations' => [
-//            'size' => 550000,
+//            'size' => 5500000,
 //            'num_hashes' => 10,
 //            'persistence' => [
 //                'driver' => 'redis',

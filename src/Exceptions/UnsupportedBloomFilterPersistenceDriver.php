@@ -1,11 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 
 namespace Denismitr\Bloom\Exceptions;
 
 
 class UnsupportedBloomFilterPersistenceDriver extends BloomServiceException
 {
+    public static function type(string $type): self
+    {
+        return new static("Bloom filter persistence driver must be a string, but [{$type}] was given.");
+    }
+
     public static function driver($driver): self
     {
         $driver = is_string($driver) ? $driver : gettype($driver);

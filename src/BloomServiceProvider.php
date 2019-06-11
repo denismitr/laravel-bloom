@@ -4,6 +4,8 @@
 namespace Denismitr\Bloom;
 
 
+use Denismitr\Bloom\Factories\HasherFactory;
+use Denismitr\Bloom\Factories\PersisterFactory;
 use Illuminate\Support\ServiceProvider;
 
 class BloomServiceProvider extends ServiceProvider
@@ -25,7 +27,10 @@ class BloomServiceProvider extends ServiceProvider
     protected function registerBloomManager()
     {
         $this->app->singleton('bloom.manager', function($app) {
-            return new BloomManager($app['config']);
+            $persisterFactory = new PersisterFactory();
+            $hasherFactory = new HasherFactory();
+
+            return new BloomManager($app['config'], $persisterFactory, $hasherFactory);
         });
     }
 }
