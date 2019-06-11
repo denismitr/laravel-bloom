@@ -2,22 +2,6 @@
 
 #### Under Construction
 
-### Usage
-
-##### Default configuration
-
-```php
-Bloom::key("shown-banners")->add($banner->id);
-...
-Bloom::key("shown-banners")->test($banner->id);
-// true
-Bloom::key("shown-banners")->test($unseenBanner->id);
-// false, but can be true sometimes (a false positive)
-
-// reset bloom filter for given key
-Bloom::key('shown-banners')->reset();
-```
-
 ### Configuration
 
 Bloom filter configuration file: `bloom.php`
@@ -59,3 +43,42 @@ specified inside the `keys` section.
     - `driver` - at the moment only **redis** is supported
     - `connection` - for redis connection is specified in `redis` section of the `database.php` configuration file in standard Laravel setup.
 - `hashing_algorithm` - self explanatory, at the moment only `md5` is supported. 
+
+
+### Usage
+
+##### Default configuration
+
+```php
+Bloom::key("shown-banners")->add($banner->id);
+...
+Bloom::key("shown-banners")->test($banner->id);
+// true
+Bloom::key("shown-banners")->test($unseenBanner->id);
+// false, but can be true sometimes (a false positive)
+
+// reset bloom filter for given key
+Bloom::key('shown-banners')->reset();
+```
+
+#### Key specific configuration
+
+in `bloom.php` find `keys` section and add a configuration for a **key** that you want
+to use with parameters others than `default`.
+
+```php
+'keys' => [
+    'seen-banners' => [
+        'size' => 5550000,
+        'num_hashes' => 3,
+        'persistence' => [
+            'driver' => 'redis',
+            'connection' => 'default'
+        ],
+        'hashing_algorithm' => 'md5',
+    ]    
+]
+```
+
+now when you use Bloom filter with that key it will use that configuration. 
+`Bloom::key('seen-banners')->add($bammer->id)`

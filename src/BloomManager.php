@@ -40,6 +40,7 @@ final class BloomManager
      * @param Repository $config
      * @param PersisterFactory $persisterFactory
      * @param HasherFactory $hasherFactory
+     * @throws InvalidBloomFilterConfiguration
      */
     public function __construct(
         Repository $config,
@@ -49,8 +50,13 @@ final class BloomManager
     {
         $bloomConfig = $config->get('bloom');
 
-        if ( ! is_array($bloomConfig) || empty($bloomConfig) ) {
-            InvalidBloomFilterConfiguration::because("Bloom filter configuration file [bloom.php] is empty or misplaced");
+        if (
+            ! is_array($bloomConfig)
+            || empty($bloomConfig)
+            || ! isset($bloomConfig['default'])
+            || ! isset($bloomConfig['keys'])
+        ) {
+            throw InvalidBloomFilterConfiguration::because("Bloom filter configuration file [bloom.php] is empty, invalid or misplaced");
         }
 
         $this->config = $bloomConfig;

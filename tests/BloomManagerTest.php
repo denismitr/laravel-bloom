@@ -241,4 +241,29 @@ class BloomManagerTest extends TestCase
 
         Bloom::key('specific');
     }
+
+    /**
+     * @test
+     * @dataProvider invalidBloomConfigurationPresets
+     */
+    public function it_throws_if_config_file_is_modified_incorrectly($preset)
+    {
+        config()->set('bloom', $preset);
+
+        $this->expectException(InvalidBloomFilterConfiguration::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage("Bloom filter configuration file [bloom.php] is empty, invalid or misplaced");
+
+        Bloom::key('any-key');
+    }
+
+    public function invalidBloomConfigurationPresets(): array
+    {
+        return [
+            [null],
+            [ [] ],
+            [ ['invalid' => []] ],
+            [ ['default' => []] ],
+        ];
+    }
 }
