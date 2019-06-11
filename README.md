@@ -3,13 +3,19 @@
 #### Under Construction
 
 ### Usage
+
+##### Default configuration
+
 ```php
 Bloom::key("shown-banners")->add($banner->id);
 ...
 Bloom::key("shown-banners")->test($banner->id);
 // true
 Bloom::key("shown-banners")->test($unseenBanner->id);
-// false (but can be a false positive)
+// false, but can be true sometimes (a false positive)
+
+// reset bloom filter for given key
+Bloom::key('shown-banners')->reset();
 ```
 
 ### Configuration
