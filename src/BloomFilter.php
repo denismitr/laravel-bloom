@@ -101,7 +101,7 @@ class BloomFilter
 
     /**
      * @param $size
-     * @return int
+     * @return int|string
      * @throws InvalidBloomFilterSize
      */
     private function validatedSize($size): int
@@ -115,7 +115,7 @@ class BloomFilter
 
     /**
      * @param $num
-     * @return int
+     * @return int|string
      * @throws InvalidBloomFilterHashFunctionsNumber
      */
     private function validatedNumHashes($num): int

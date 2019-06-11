@@ -13,14 +13,15 @@ return [
 
     'keys' => [
          // keys specific params
-        'user_recommendations' => [
-            'size' => 550000,
-            'num_hashes' => 10,
-            'persistence' => [
-                'driver' => 'redis',
-                'connection' => 'default'
-            ],
-            'hashing_algorithm' => 'md5',
-        ]
+         // example
+//        'user_recommendations' => [
+//            'size' => 550000,
+//            'num_hashes' => 10,
+//            'persistence' => [
+//                'driver' => 'redis',
+//                'connection' => 'default'
+//            ],
+//            'hashing_algorithm' => 'md5',
+//        ]
     ],
 ];

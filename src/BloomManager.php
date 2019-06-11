@@ -34,8 +34,10 @@ final class BloomManager
      * @param string $key
      * @param string|null $keySuffix
      * @return BloomFilter
-     * @throws UnsupportedHashingAlgorithm
+     * @throws Exceptions\InvalidBloomFilterHashFunctionsNumber
+     * @throws Exceptions\InvalidBloomFilterSize
      * @throws UnsupportedBloomFilterPersistenceDriver
+     * @throws UnsupportedHashingAlgorithm
      */
     public function key(string $key, ?string $keySuffix = null): BloomFilter
     {
@@ -45,11 +47,12 @@ final class BloomManager
 
         $persister = $this->resolvePersister($key);
 
-        return $this->resolveBloomFilter($key, $indexer, $persister);
+        return $this->resolveBloomFilter($key, $keySuffix, $indexer, $persister);
     }
 
     /**
      * @param string $key
+     * @param string|null $keySuffix
      * @param Indexer $indexer
      * @param Persister $persister
      * @return BloomFilter
@@ -58,11 +61,14 @@ final class BloomManager
      */
     private function resolveBloomFilter(
         string $key,
+        ?string $keySuffix,
         Indexer $indexer,
         Persister $persister
     ): BloomFilter
     {
         $config = $this->resolveKeySpecificConfig($key);
+
+        $key = $keySuffix ? $key.strval($keySuffix) : $key;
 
         return new BloomFilter($key, $config, $indexer, $persister);
     }

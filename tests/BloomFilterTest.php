@@ -52,6 +52,60 @@ class BloomFilterTest extends TestCase
 
     /**
      * @test
+     * @dataProvider keysWithSuffixesDataProvider
+     * @param int|string $userA
+     * @param int|string $userB
+     * @param int|string $recommendationA
+     * @param int|string $recommendationB
+     */
+    public function it_can_use_key_suffix($userA, $userB, $recommendationA, $recommendationB)
+    {
+        $bloomFilterA = Bloom::key('user-recommendations', $userA);
+        $bloomFilterB = Bloom::key('user-recommendations', $userB);
+
+        $bloomFilterA->add($recommendationA);
+        $bloomFilterB->add($recommendationB);
+
+        $this->assertTrue($bloomFilterA->test($recommendationA));
+        $this->assertTrue($bloomFilterB->test($recommendationB));
+
+        $this->assertFalse($bloomFilterA->test($recommendationB));
+        $this->assertFalse($bloomFilterB->test($recommendationA));
+    }
+
+    /**
+     * @test
+     * @dataProvider keysWithSuffixesDataProvider
+     * @param int|string $userA
+     * @param int|string $userB
+     * @param int|string $recommendationA
+     * @param int|string $recommendationB
+     */
+    public function it_can_use_key_suffix_for_reset_as_well($userA, $userB, $recommendationA, $recommendationB)
+    {
+        $bloomFilterA = Bloom::key('user-recommendations', $userA);
+        $bloomFilterB = Bloom::key('user-recommendations', $userB);
+
+        $bloomFilterA->add($recommendationA);
+        $bloomFilterB->add($recommendationB);
+
+        $this->assertTrue($bloomFilterA->test($recommendationA));
+        $this->assertTrue($bloomFilterB->test($recommendationB));
+
+        $this->assertFalse($bloomFilterA->test($recommendationB));
+        $this->assertFalse($bloomFilterB->test($recommendationA));
+
+        $bloomFilterA->reset();
+        $bloomFilterB->reset();
+
+        $this->assertFalse($bloomFilterA->test($recommendationA));
+        $this->assertFalse($bloomFilterB->test($recommendationB));
+        $this->assertFalse($bloomFilterA->test($recommendationB));
+        $this->assertFalse($bloomFilterB->test($recommendationA));
+    }
+
+    /**
+     * @test
      */
     public function it_can_reset_a_given_key()
     {
@@ -70,6 +124,14 @@ class BloomFilterTest extends TestCase
     {
         return [
             [1], ['1'], [12345], ['abc'], [19.8], [1000000], ['test-item-value']
+        ];
+    }
+
+    public function keysWithSuffixesDataProvider(): array
+    {
+        return [
+            [4, 456, 567884, 567889],
+            ['u12345', 'u435t53463', 'i545895646', 'i42534534953468']
         ];
     }
 }
