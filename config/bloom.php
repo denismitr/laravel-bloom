@@ -1,5 +1,7 @@
 <?php
 
+// Bloom filter configuration file
+
 return [
     'default' => [
         'size' => 10000000,
