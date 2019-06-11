@@ -7,6 +7,7 @@ namespace Denismitr\Bloom\Tests;
 use Denismitr\Bloom\BloomManager;
 use Denismitr\Bloom\BloomFilter;
 use Denismitr\Bloom\Exceptions\BloomServiceException;
+use Denismitr\Bloom\Exceptions\InvalidBloomFilterConfiguration;
 use Denismitr\Bloom\Exceptions\InvalidBloomFilterHashFunctionsNumber;
 use Denismitr\Bloom\Exceptions\InvalidBloomFilterSize;
 use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
@@ -73,6 +74,7 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(UnsupportedBloomFilterPersistenceDriver::class);
+        $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage('Bloom filter persistence driver must be a string, but [NULL] was given.');
 
@@ -95,6 +97,7 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(UnsupportedBloomFilterPersistenceDriver::class);
+        $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage('Bloom filter persistence driver [mysql] is not supported.');
 
@@ -117,6 +120,7 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(UnsupportedHashingAlgorithm::class);
+        $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage("Unsupported hashing algorithm: sha256.");
 
@@ -139,6 +143,7 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(UnsupportedHashingAlgorithm::class);
+        $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage("Unsupported hashing algorithm: sha512.");
 
@@ -161,6 +166,7 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(InvalidBloomFilterSize::class);
+        $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage("Size must be a positive integer: value [-333] is invalid.");
 
@@ -183,6 +189,7 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(InvalidBloomFilterSize::class);
+        $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage("Size must be a positive integer: value [boo] is invalid.");
 
@@ -205,6 +212,7 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(InvalidBloomFilterHashFunctionsNumber::class);
+        $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage("Number of hash functions must be a positive integer: value [0] is invalid.");
 
@@ -227,6 +235,7 @@ class BloomManagerTest extends TestCase
         ]);
 
         $this->expectException(InvalidBloomFilterHashFunctionsNumber::class);
+        $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage("Number of hash functions must be a positive integer: value [foo] is invalid.");
 

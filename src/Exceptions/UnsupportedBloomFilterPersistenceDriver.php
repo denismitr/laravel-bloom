@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace Denismitr\Bloom\Exceptions;
 
 
-class UnsupportedBloomFilterPersistenceDriver extends BloomServiceException
+class UnsupportedBloomFilterPersistenceDriver extends InvalidBloomFilterConfiguration
 {
     public static function type(string $type): self
     {

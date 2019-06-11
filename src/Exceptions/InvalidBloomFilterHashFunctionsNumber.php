@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Denismitr\Bloom\Exceptions;
 
 
-class InvalidBloomFilterHashFunctionsNumber extends BloomServiceException
+class InvalidBloomFilterHashFunctionsNumber extends InvalidBloomFilterConfiguration
 {
     public static function number($number): self
     {

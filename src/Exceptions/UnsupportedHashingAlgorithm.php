@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Denismitr\Bloom\Exceptions;
 
 
-class UnsupportedHashingAlgorithm extends BloomServiceException
+class UnsupportedHashingAlgorithm extends InvalidBloomFilterConfiguration
 {
     /**
      * @param string $algorithm

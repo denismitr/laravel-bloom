@@ -5,6 +5,7 @@ namespace Denismitr\Bloom;
 
 
 use Denismitr\Bloom\Contracts\{Persister};
+use Denismitr\Bloom\Exceptions\InvalidBloomFilterConfiguration;
 use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
 use Denismitr\Bloom\Exceptions\UnsupportedHashingAlgorithm;
 use Denismitr\Bloom\Factories\HasherFactory;
@@ -46,7 +47,13 @@ final class BloomManager
         HasherFactory $hasherFactory
     )
     {
-        $this->config = $config->get('bloom');
+        $bloomConfig = $config->get('bloom');
+
+        if ( ! is_array($bloomConfig) || empty($bloomConfig) ) {
+            InvalidBloomFilterConfiguration::because("Bloom filter configuration file [bloom.php] is empty or misplaced");
+        }
+
+        $this->config = $bloomConfig;
         $this->persisterFactory = $persisterFactory;
         $this->hasherFactory = $hasherFactory;
     }

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 
 namespace Denismitr\Bloom\Exceptions;
 
 
-class InvalidBloomFilterSize extends BloomServiceException
+class InvalidBloomFilterSize extends InvalidBloomFilterConfiguration
 {
     public static function size($size): self
     {
