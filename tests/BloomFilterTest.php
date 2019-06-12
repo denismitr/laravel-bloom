@@ -4,6 +4,7 @@
 namespace Denismitr\Bloom\Tests;
 
 
+use Denismitr\Bloom\Exceptions\InvalidItemType;
 use Denismitr\Bloom\Facades\Bloom;
 use Illuminate\Support\Facades\Redis;
 
@@ -138,6 +139,7 @@ class BloomFilterTest extends TestCase
      * @param int|string $userB
      * @param int|string $recommendationA
      * @param int|string $recommendationB
+     * @throws \Denismitr\Bloom\Exceptions\InvalidItemType
      */
     public function it_can_use_key_suffix_for_reset_as_well($userA, $userB, $recommendationA, $recommendationB)
     {
@@ -176,6 +178,32 @@ class BloomFilterTest extends TestCase
         $bloomFilter->clear();
 
         $this->assertFalse($bloomFilter->test(155));
+    }
+
+    /**
+     * @test
+     * @throws InvalidItemType
+     */
+    public function it_throws_if_invalid_item_is_added()
+    {
+        $bloomFilter = Bloom::key('key-in-need-of-reset');
+
+        $this->expectException(InvalidItemType::class);
+
+        $bloomFilter->add([]);
+    }
+
+    /**
+     * @test
+     * @throws InvalidItemType
+     */
+    public function it_throws_if_invalid_item_is_tested()
+    {
+        $bloomFilter = Bloom::key('key-in-need-of-reset');
+
+        $this->expectException(InvalidItemType::class);
+
+        $bloomFilter->test(new class {});
     }
 
     public function singleItemsToStore(): array
