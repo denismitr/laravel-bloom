@@ -56,8 +56,8 @@ final class BloomFilter
         $this->key = $key;
         $this->persister = $persister;
 
-        $this->numHashes = $this->validatedNumHashes(Arr::get($config, 'num_hashes', 5));
-        $this->size = $this->validatedSize(Arr::get($config, 'size', 10000000));
+        $this->numHashes = $this->validatedNumHashes(Arr::get($config, 'num_hashes'));
+        $this->size = $this->validatedSize(Arr::get($config, 'size'));
     }
 
     /**
@@ -119,11 +119,13 @@ final class BloomFilter
             throw InvalidBloomFilterSize::size($size);
         }
 
+        $size = intval($size);
+
         if ($size > $this->persister->getMaxCapacity()) {
             throw InvalidBloomFilterSize::max($size, $this->persister->getMaxCapacity());
         }
 
-        return intval($size);
+        return $size;
     }
 
     /**

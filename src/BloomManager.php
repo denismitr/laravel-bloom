@@ -72,6 +72,7 @@ final class BloomManager
      * @throws Exceptions\InvalidBloomFilterSize
      * @throws UnsupportedBloomFilterPersistenceDriver
      * @throws UnsupportedHashingAlgorithm
+     * @throws InvalidBloomFilterConfiguration
      */
     public function key(string $key, ?string $keySuffix = null): BloomFilter
     {
@@ -124,6 +125,7 @@ final class BloomManager
      * @param array $config
      * @return Persister
      * @throws UnsupportedBloomFilterPersistenceDriver
+     * @throws InvalidBloomFilterConfiguration
      */
     private function resolvePersister(array $config): Persister
     {

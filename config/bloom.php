@@ -4,8 +4,8 @@
 
 return [
     'default' => [
-        'size' => 16777216,
-        'num_hashes' => 4,
+        'size' => 100000000,
+        'num_hashes' => 5,
         'persistence' => [
             'driver' => 'redis',
             'connection' => 'default'

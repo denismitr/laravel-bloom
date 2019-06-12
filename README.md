@@ -21,8 +21,8 @@ Bloom filter configuration file: `bloom.php`
 ```php
 return [
     'default' => [
-        'size' => 16777216,
-        'num_hashes' => 4,
+        'size' => 100000000,
+        'num_hashes' => 5,
         'persistence' => [
             'driver' => 'redis',
             'connection' => 'default'
@@ -45,6 +45,8 @@ return [
     ],
 ];
 ```
+
+`MAX_CAPACITY` for this Bloom filter implementation is currently at `4294967296`. 
 
 `default` section applies to all keys, unless they have a dedicated configuration,
 specified inside the `keys` section.

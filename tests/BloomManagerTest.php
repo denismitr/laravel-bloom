@@ -64,6 +64,28 @@ class BloomManagerTest extends TestCase
     /**
      * @test
      */
+    public function it_throws_if_bloom_filter_size_is_too_large()
+    {
+        config()->set('bloom.default', [
+            'size' => 4294967297,
+            'num_hashes' => 5,
+            'persistence' => [
+                'driver' => 'redis',
+                'connection' => 'default'
+            ],
+            'hashing_algorithm' => 'md5',
+        ]);
+
+        $this->expectException(InvalidBloomFilterConfiguration::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage('Size must not be greater than [4294967296] for the given perister driver: value [4294967297] is too large.');
+
+        Bloom::key('some-key');
+    }
+
+    /**
+     * @test
+     */
     public function it_throws_if_default_persistence_driver_is_unsupported()
     {
         config()->set('bloom.default', [
