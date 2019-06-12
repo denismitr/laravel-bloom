@@ -93,3 +93,23 @@ to use with parameters others than `default`.
 
 now when you use Bloom filter with that key it will use that configuration. 
 `Bloom::key('seen-banners')->add($bammer->id)`
+
+#### Key suffix
+For your convenience there is an easy way to generate user specific keys, just pass 
+user ID as a second argument when calling the `key` method like so:
+```php
+Bloom::key('user-recommendation', $user->id)->add($recommendation->id);
+```
+
+or
+
+```php
+$bloomFilter = Bloom::key('user-recommendation', $user->id);
+
+$bloomFilter->add($recommendation->id);
+
+$bloomFilter->test($recommendation->id); // true
+
+// to reset that user specific key do
+$bloomFilter->reset();
+```

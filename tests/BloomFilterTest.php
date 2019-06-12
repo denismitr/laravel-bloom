@@ -33,6 +33,61 @@ class BloomFilterTest extends TestCase
 
     /**
      * @test
+     * @dataProvider multipleItems
+     * @param array $itemsToAdd
+     * @param array $itemsToMiss
+     */
+    public function multiple_items_do_not_overlap(array $itemsToAdd, array $itemsToMiss)
+    {
+        foreach ($itemsToAdd as $item) {
+            Bloom::key('user-recommendations')->add($item);
+        }
+
+        foreach ($itemsToAdd as $item) {
+            $this->assertTrue(Bloom::key('user-recommendations')->test($item));
+        }
+
+        foreach ($itemsToMiss as $item) {
+            $this->assertFalse(Bloom::key('user-recommendations')->test($item));
+        }
+    }
+
+    /**
+     * @test
+     * @dataProvider multipleItemsUserSpecific
+     * @param array $usersToAddTo
+     * @param array $itemsToAdd
+     * @param array $usersToMiss
+     */
+    public function multiple_items_with_for_user_specific_key_do_not_overlap(array $usersToAddTo, array $itemsToAdd, array $usersToMiss)
+    {
+        foreach ($usersToAddTo as $user) {
+            $bloomFilter = Bloom::key('user-recommendations', $user);
+
+            foreach ($itemsToAdd as $item) {
+                $bloomFilter->add($item);
+            }
+        }
+
+        foreach ($usersToAddTo as $user) {
+            $bloomFilter = Bloom::key('user-recommendations', $user);
+
+            foreach ($itemsToAdd as $item) {
+                $this->assertTrue($bloomFilter->test($item));
+            }
+        }
+
+        foreach ($usersToMiss as $user) {
+            $bloomFilter = Bloom::key('user-recommendations', $user);
+
+            foreach ($itemsToAdd as $item) {
+                $this->assertFalse($bloomFilter->test($item));
+            }
+        }
+    }
+
+    /**
+     * @test
      * @dataProvider singleItemsToStore
      */
     public function it_can_verify_stored_single_result($item)
@@ -130,8 +185,35 @@ class BloomFilterTest extends TestCase
     public function keysWithSuffixesDataProvider(): array
     {
         return [
-            [4, 456, 567884, 567889],
+            ['userA' => 4, 'userB' => 456, 'recommendationA' => 567884, 'recommendationB' => 567889],
             ['u12345', 'u435t53463', 'i545895646', 'i42534534953468']
+        ];
+    }
+
+    public function multipleItems(): array
+    {
+        return [
+            ['itemsToAdd' => [1,2,3,4,5,6,7,8,9,10,11,12], 'itemsToMiss' => [19, 20, 21, 22, 234, 23, 55, 90, 100, 101]],
+            [
+                'itemsToAdd' => ['a','b','c','d','e','f','g','h','f','a1','b1','c4', 'e1', 'e3', 'f5', 'f6', 'a9', 'b56'],
+                'itemsToMiss' => ['A', 'B', 'C4', 'C22', 'E45', 'G5', 'R55', 'A90', 'FF100', 'W101']
+            ]
+        ];
+    }
+
+    public function multipleItemsUserSpecific(): array
+    {
+        return [
+            [
+                'usersToAddTo' => [1,2,3,4,5,6,7,8,9,10],
+                'itemsToAdd' => [1,2,3,4,5,6,7,8,9,10,11,12],
+                'usersToMiss' => [19, 20, 21, 22, 234, 23, 55, 90, 100, 101]
+            ],
+            [
+                'usersToAddTo' => [1,2,3,4,5,6,7,8,9,10,11,12],
+                'itemsToAdd' => ['a','b','c','d','e','f','g','h','f','a1','b1','c4', 'e1', 'e3', 'f5', 'f6', 'a9', 'b56'],
+                'usersToMiss' => [19, 20, 21, 22, 234, 23, 55, 90, 100, 101]
+            ]
         ];
     }
 }
