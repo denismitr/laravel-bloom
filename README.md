@@ -114,3 +114,7 @@ $bloomFilter->test($recommendation->id); // true
 // to reset that user specific key do
 $bloomFilter->reset();
 ```
+
+### Testing
+
+For now you need an actual Redis set up on your machine.
