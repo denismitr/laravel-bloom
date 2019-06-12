@@ -111,8 +111,8 @@ $bloomFilter->add($recommendation->id);
 
 $bloomFilter->test($recommendation->id); // true
 
-// to reset that user specific key do
-$bloomFilter->reset();
+// to clear that key do
+$bloomFilter->clear();
 ```
 
 ### Testing

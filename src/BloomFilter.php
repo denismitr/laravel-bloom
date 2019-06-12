@@ -78,7 +78,7 @@ class BloomFilter
         return $this->persister->getBits($this->key, $indexes)->test();
     }
 
-    public function reset(): void
+    public function clear(): void
     {
         $this->persister->reset($this->key);
     }

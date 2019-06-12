@@ -150,8 +150,8 @@ class BloomFilterTest extends TestCase
         $this->assertFalse($bloomFilterA->test($recommendationB));
         $this->assertFalse($bloomFilterB->test($recommendationA));
 
-        $bloomFilterA->reset();
-        $bloomFilterB->reset();
+        $bloomFilterA->clear();
+        $bloomFilterB->clear();
 
         $this->assertFalse($bloomFilterA->test($recommendationA));
         $this->assertFalse($bloomFilterB->test($recommendationB));
@@ -170,7 +170,7 @@ class BloomFilterTest extends TestCase
 
         $this->assertTrue($bloomFilter->test(155));
 
-        $bloomFilter->reset();
+        $bloomFilter->clear();
 
         $this->assertFalse($bloomFilter->test(155));
     }
