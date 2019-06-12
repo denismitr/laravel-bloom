@@ -12,7 +12,8 @@ the more elements that are added to the set, the larger the probability of false
 
 Read the [Full article on Wikipedia](https://en.wikipedia.org/wiki/Bloom_filter).
 
-#### Under Construction
+### Installation
+`composer require denismitr/laravel-bloom`
 
 ### Configuration
 
@@ -118,5 +119,9 @@ $bloomFilter->clear();
 ```
 
 ### Testing
+
+- Test coverage > 90%
+
+`composer test`
 
 For now you need an actual Redis set up on your machine.
