@@ -1,4 +1,5 @@
 ## Laravel Bloom filter implementation
+[![Build Status](https://travis-ci.org/denismitr/laravel-bloom.svg?branch=master)](https://travis-ci.org/denismitr/laravel-bloom.svg?branch=master)
 
 A Bloom filter is a space-efficient probabilistic data structure, 
 conceived by Burton Howard Bloom in 1970, 
