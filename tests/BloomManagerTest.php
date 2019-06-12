@@ -84,6 +84,28 @@ class BloomManagerTest extends TestCase
     /**
      * @test
      */
+    public function it_throw_if_redis_connection_is_incorrect()
+    {
+        config()->set('bloom.default', [
+            'size' => 333000,
+            'num_hashes' => 3,
+            'persistence' => [
+                'driver' => 'redis',
+                'connection' => 'incorrect-connection'
+            ],
+            'hashing_algorithm' => 'md5',
+        ]);
+
+        $this->expectException(InvalidBloomFilterConfiguration::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage('Redis connection [incorrect-connection] not configured.');
+
+        Bloom::key('some-key');
+    }
+
+    /**
+     * @test
+     */
     public function it_throws_if_key_specific_persistence_driver_is_unsupported()
     {
         config()->set('bloom.keys.some-specific-key', [
