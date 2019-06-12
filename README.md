@@ -21,8 +21,8 @@ Bloom filter configuration file: `bloom.php`
 ```php
 return [
     'default' => [
-        'size' => 10000000,
-        'num_hashes' => 5,
+        'size' => 16777216,
+        'num_hashes' => 4,
         'persistence' => [
             'driver' => 'redis',
             'connection' => 'default'

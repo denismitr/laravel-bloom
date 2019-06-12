@@ -9,6 +9,8 @@ use Illuminate\Redis\Connections\Connection;
 
 final class PersisterRedisImpl implements Persister
 {
+    const MAX_CAPACITY = 4294967296;
+
     /**
      * @var Connection
      */
@@ -55,8 +57,16 @@ final class PersisterRedisImpl implements Persister
     /**
      * @param string $key
      */
-    public function reset(string $key): void
+    public function clear(string $key): void
     {
         $this->redis->del([$key]);
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxCapacity(): int
+    {
+        return self::MAX_CAPACITY;
     }
 }

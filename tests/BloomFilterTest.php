@@ -36,6 +36,7 @@ class BloomFilterTest extends TestCase
      * @dataProvider multipleItems
      * @param array $itemsToAdd
      * @param array $itemsToMiss
+     * @throws \Denismitr\Bloom\Exceptions\InvalidItemType
      */
     public function multiple_items_do_not_overlap(array $itemsToAdd, array $itemsToMiss)
     {
@@ -58,6 +59,7 @@ class BloomFilterTest extends TestCase
      * @param array $usersToAddTo
      * @param array $itemsToAdd
      * @param array $usersToMiss
+     * @throws \Denismitr\Bloom\Exceptions\InvalidItemType
      */
     public function multiple_items_with_for_user_specific_key_do_not_overlap(array $usersToAddTo, array $itemsToAdd, array $usersToMiss)
     {
@@ -112,6 +114,7 @@ class BloomFilterTest extends TestCase
      * @param int|string $userB
      * @param int|string $recommendationA
      * @param int|string $recommendationB
+     * @throws \Denismitr\Bloom\Exceptions\InvalidItemType
      */
     public function it_can_use_key_suffix($userA, $userB, $recommendationA, $recommendationB)
     {
@@ -193,10 +196,17 @@ class BloomFilterTest extends TestCase
     public function multipleItems(): array
     {
         return [
-            ['itemsToAdd' => [1,2,3,4,5,6,7,8,9,10,11,12], 'itemsToMiss' => [19, 20, 21, 22, 234, 23, 55, 90, 100, 101]],
+            [
+                'itemsToAdd' => [1,2,3,4,5,6,7,8,9,10,11,12],
+                'itemsToMiss' => [19, 20, 21, 22, 234, 23, 55, 90, 100, 101]
+            ],
             [
                 'itemsToAdd' => ['a','b','c','d','e','f','g','h','f','a1','b1','c4', 'e1', 'e3', 'f5', 'f6', 'a9', 'b56'],
                 'itemsToMiss' => ['A', 'B', 'C4', 'C22', 'E45', 'G5', 'R55', 'A90', 'FF100', 'W101']
+            ],
+            [
+                'itemsToAdd' => [1.5,2.9,3.3,4.5,5.7,6.5,7.124,8.0009,9.564,10.1111,11.2222,12.4321],
+                'itemsToMiss' => [1.99, 2.1, 4.3, 5.5, 6.6, 7.987, 8.1119, 9.123, 11.9999, 12.654]
             ]
         ];
     }

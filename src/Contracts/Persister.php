@@ -29,5 +29,10 @@ interface Persister
     /**
      * @param string $key
      */
-    public function reset(string $key): void;
+    public function clear(string $key): void;
+
+    /**
+     * @return int
+     */
+    public function getMaxCapacity(): int;
 }

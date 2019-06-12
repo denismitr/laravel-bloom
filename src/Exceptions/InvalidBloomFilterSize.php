@@ -12,4 +12,11 @@ class InvalidBloomFilterSize extends InvalidBloomFilterConfiguration
     {
         return new static("Size must be a positive integer: value [{$size}] is invalid.");
     }
+
+    public static function max(int $size, int $maxCapacity): self
+    {
+        return new static(
+    "Size must not be greater than [{$maxCapacity}] for the given perister driver: value [{$size}] istoo large."
+        );
+    }
 }
