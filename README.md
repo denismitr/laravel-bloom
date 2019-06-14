@@ -57,7 +57,7 @@ specified inside the `keys` section.
 - `persistance` - is an array containing persistence configuration - `driver` and `connection`
     - `driver` - at the moment only **redis** is supported
     - `connection` - for redis connection is specified in `redis` section of the `database.php` configuration file in standard Laravel setup.
-- `hashing_algorithm` - self explanatory, at the moment only `md5` is supported. 
+- `hashing_algorithm` - self explanatory, at the moment `md5` and `murmur` hashing algorithms are supported. 
 
 
 ### Usage
