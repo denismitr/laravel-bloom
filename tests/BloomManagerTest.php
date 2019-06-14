@@ -64,17 +64,34 @@ class BloomManagerTest extends TestCase
     /**
      * @test
      */
+    public function it_can_instantiate_bloom_filter_with_key_specific_murmur_configuration()
+    {
+        config()->set('bloom.keys', [
+            'user_recommendations' => [
+                'size' => 550000,
+                'num_hashes' => 4,
+                'persistence' => [
+                    'driver' => 'redis',
+                    'connection' => 'default'
+                ],
+                'hashing_algorithm' => 'murmur',
+            ]
+        ]);
+
+        $bloomFilter = Bloom::key('user_recommendations');
+
+        $this->assertInstanceOf(BloomFilter::class, $bloomFilter);
+
+        $this->assertEquals(550000, $bloomFilter->getSize());
+        $this->assertEquals(4, $bloomFilter->getNumHashes());
+    }
+
+    /**
+     * @test
+     */
     public function it_throws_if_bloom_filter_size_is_too_large()
     {
-        config()->set('bloom.default', [
-            'size' => 4294967297,
-            'num_hashes' => 5,
-            'persistence' => [
-                'driver' => 'redis',
-                'connection' => 'default'
-            ],
-            'hashing_algorithm' => 'md5',
-        ]);
+        config()->set('bloom.default.size', 4294967297);
 
         $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
@@ -153,15 +170,7 @@ class BloomManagerTest extends TestCase
      */
     public function it_throws_if_default_hashing_algorithm_is_unsupported()
     {
-        config()->set('bloom.default', [
-            'size' => 333000,
-            'num_hashes' => 3,
-            'persistence' => [
-                'driver' => 'redis',
-                'connection' => 'default'
-            ],
-            'hashing_algorithm' => 'sha256',
-        ]);
+        config()->set('bloom.default.hashing_algorithm', 'sha256');
 
         $this->expectException(UnsupportedHashingAlgorithm::class);
         $this->expectException(InvalidBloomFilterConfiguration::class);
