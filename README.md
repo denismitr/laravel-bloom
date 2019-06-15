@@ -15,6 +15,8 @@ Read the [Full article on Wikipedia](https://en.wikipedia.org/wiki/Bloom_filter)
 ### Installation
 `composer require denismitr/laravel-bloom`
 
+Latest version - **0.3**
+
 ### Configuration
 
 ```bash
