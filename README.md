@@ -17,6 +17,10 @@ Read the [Full article on Wikipedia](https://en.wikipedia.org/wiki/Bloom_filter)
 
 ### Configuration
 
+```bash
+php artisan vendor:publish --provider="Denismitr\Bloom\BloomServiceProvider" --tag="config"
+```
+
 Bloom filter configuration file: `bloom.php`
 
 ```php

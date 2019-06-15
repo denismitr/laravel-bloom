@@ -24,6 +24,7 @@ class BloomManagerTest extends TestCase
         $manager = resolve(BloomManager::class);
 
         $this->assertInstanceOf(BloomManager::class, $manager);
+        $this->assertInstanceOf(BloomFilter::class, $manager->key('some-key'));
     }
 
     /**
@@ -125,19 +126,25 @@ class BloomManagerTest extends TestCase
      */
     public function it_throw_if_redis_connection_is_incorrect()
     {
-        config()->set('bloom.default', [
-            'size' => 333000,
-            'num_hashes' => 3,
-            'persistence' => [
-                'driver' => 'redis',
-                'connection' => 'incorrect-connection'
-            ],
-            'hashing_algorithm' => 'md5',
-        ]);
+        config()->set('bloom.default.persistence.connection', 'incorrect-connection');
 
         $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage('Redis connection [incorrect-connection] not configured.');
+
+        Bloom::key('some-key');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throw_if_redis_connection_is_not_specified_correctly()
+    {
+        config()->set('bloom.default.persistence.connection', 0);
+
+        $this->expectException(InvalidBloomFilterConfiguration::class);
+        $this->expectException(BloomServiceException::class);
+        $this->expectExceptionMessage('Bloom filter persistence connection must be a string, but [integer] was given.');
 
         Bloom::key('some-key');
     }
@@ -192,13 +199,13 @@ class BloomManagerTest extends TestCase
                 'driver' => 'redis',
                 'connection' => 'default'
             ],
-            'hashing_algorithm' => 'sha512',
+            'hashing_algorithm' => 'baz',
         ]);
 
         $this->expectException(UnsupportedHashingAlgorithm::class);
         $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
-        $this->expectExceptionMessage("Unsupported hashing algorithm: sha512.");
+        $this->expectExceptionMessage("Unsupported hashing algorithm: baz.");
 
         Bloom::key('specific');
     }
@@ -206,17 +213,9 @@ class BloomManagerTest extends TestCase
     /**
      * @test
      */
-    public function it_throws_if_default_price_is_not_an_unsigned_integer()
+    public function it_throws_if_default_size_is_not_an_unsigned_integer()
     {
-        config()->set('bloom.default', [
-            'size' => -333,
-            'num_hashes' => 3,
-            'persistence' => [
-                'driver' => 'redis',
-                'connection' => 'default'
-            ],
-            'hashing_algorithm' => 'md5',
-        ]);
+        config()->set('bloom.default.size', -333);
 
         $this->expectException(InvalidBloomFilterSize::class);
         $this->expectException(InvalidBloomFilterConfiguration::class);
@@ -229,7 +228,7 @@ class BloomManagerTest extends TestCase
     /**
      * @test
      */
-    public function it_throws_if_key_specific_price_is_not_an_unsigned_integer()
+    public function it_throws_if_key_specific_size_is_not_an_unsigned_integer()
     {
         config()->set('bloom.keys.specific', [
             'size' => 'boo',
@@ -254,15 +253,7 @@ class BloomManagerTest extends TestCase
      */
     public function it_throws_if_default_number_of_hash_functions_is_not_a_positive_integer()
     {
-        config()->set('bloom.default', [
-            'size' => 300,
-            'num_hashes' => 0,
-            'persistence' => [
-                'driver' => 'redis',
-                'connection' => 'default'
-            ],
-            'hashing_algorithm' => 'md5',
-        ]);
+        config()->set('bloom.default.num_hashes', 0);
 
         $this->expectException(InvalidBloomFilterHashFunctionsNumber::class);
         $this->expectException(InvalidBloomFilterConfiguration::class);
@@ -277,15 +268,7 @@ class BloomManagerTest extends TestCase
      */
     public function it_throws_if_key_specific_number_of_hash_functions_is_not_a_positive_integer()
     {
-        config()->set('bloom.keys.specific', [
-            'size' => 300,
-            'num_hashes' => 'foo',
-            'persistence' => [
-                'driver' => 'redis',
-                'connection' => 'default'
-            ],
-            'hashing_algorithm' => 'md5',
-        ]);
+        config()->set('bloom.keys.specific.num_hashes', 'foo');
 
         $this->expectException(InvalidBloomFilterHashFunctionsNumber::class);
         $this->expectException(InvalidBloomFilterConfiguration::class);
