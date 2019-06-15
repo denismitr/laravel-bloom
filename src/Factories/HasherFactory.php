@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 
 namespace Denismitr\Bloom\Factories;
 
@@ -19,12 +21,8 @@ class HasherFactory
      * @return Hasher
      * @throws UnsupportedHashingAlgorithm
      */
-    public function make($algorithm): Hasher
+    public function make(string $algorithm): Hasher
     {
-        if ( ! is_string($algorithm) ) {
-            throw UnsupportedHashingAlgorithm::type( gettype($algorithm) );
-        }
-
         switch(strtolower($algorithm)) {
             case self::MD5_HASH_ALGORITHM:
                 return new HasherMD5Impl();

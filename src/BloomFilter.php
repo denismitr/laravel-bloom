@@ -7,11 +7,9 @@ namespace Denismitr\Bloom;
 
 use Denismitr\Bloom\Contracts\Hasher;
 use Denismitr\Bloom\Contracts\Persister;
-use Denismitr\Bloom\Exceptions\InvalidBloomFilterHashFunctionsNumber;
-use Denismitr\Bloom\Exceptions\InvalidBloomFilterSize;
 use Denismitr\Bloom\Exceptions\InvalidItemType;
+use Denismitr\Bloom\Config\KeySpecificConfig;
 use Denismitr\Bloom\Helpers\Indexer;
-use Illuminate\Support\Arr;
 
 final class BloomFilter
 {
@@ -21,43 +19,33 @@ final class BloomFilter
     private $indexer;
 
     /**
-     * @var integer
+     * @var Persister
      */
-    private $numHashes;
+    private $persister;
 
     /**
-     * @var int
+     * @var KeySpecificConfig
      */
-    private $size;
-
+    private $config;
     /**
      * @var string
      */
     private $key;
 
     /**
-     * @var Persister
-     */
-    private $persister;
-
-    /**
      * BloomRedisImpl constructor.
      *
      * @param string $key
-     * @param array $config
+     * @param KeySpecificConfig $config
      * @param Indexer $indexer
      * @param Persister $persister
-     * @throws InvalidBloomFilterSize
-     * @throws InvalidBloomFilterHashFunctionsNumber
      */
-    public function __construct(string $key, array $config, Indexer $indexer, Persister $persister)
+    public function __construct(string $key, KeySpecificConfig $config, Indexer $indexer, Persister $persister)
     {
+        $this->config = $config;
         $this->indexer = $indexer;
-        $this->key = $key;
         $this->persister = $persister;
-
-        $this->numHashes = $this->validatedNumHashes(Arr::get($config, 'num_hashes'));
-        $this->size = $this->validatedSize(Arr::get($config, 'size'));
+        $this->key = $key;
     }
 
     /**
@@ -68,7 +56,11 @@ final class BloomFilter
     {
         $this->verifyItem($item);
 
-        $indexes = $this->indexer->getIndexes($this->numHashes, strval($item), $this->size);
+        $indexes = $this->indexer->getIndexes(
+            $this->config->getNumHashes(),
+            strval($item),
+            $this->config->getSize()
+        );
 
         $this->persister->setBits($this->key, $indexes);
     }
@@ -82,7 +74,11 @@ final class BloomFilter
     {
         $this->verifyItem($item);
 
-        $indexes = $this->indexer->getIndexes($this->numHashes, strval($item), $this->size);
+        $indexes = $this->indexer->getIndexes(
+            $this->config->getNumHashes(),
+            strval($item),
+            $this->config->getSize()
+        );
 
         return $this->persister->getBits($this->key, $indexes)->test();
     }
@@ -97,7 +93,7 @@ final class BloomFilter
      */
     public function getNumHashes(): int
     {
-        return $this->numHashes;
+        return $this->config->getNumHashes();
     }
 
     /**
@@ -105,41 +101,7 @@ final class BloomFilter
      */
     public function getSize(): int
     {
-        return $this->size;
-    }
-
-    /**
-     * @param $size
-     * @return int|string
-     * @throws InvalidBloomFilterSize
-     */
-    private function validatedSize($size): int
-    {
-        if ( ! is_integer($size) || $size <= $this->numHashes) {
-            throw InvalidBloomFilterSize::size($size);
-        }
-
-        $size = intval($size);
-
-        if ($size > $this->persister->getMaxCapacity()) {
-            throw InvalidBloomFilterSize::max($size, $this->persister->getMaxCapacity());
-        }
-
-        return $size;
-    }
-
-    /**
-     * @param $num
-     * @return int|string
-     * @throws InvalidBloomFilterHashFunctionsNumber
-     */
-    private function validatedNumHashes($num): int
-    {
-        if ( ! is_integer($num) || $num <= 0) {
-            throw InvalidBloomFilterHashFunctionsNumber::number($num);
-        }
-
-        return intval($num);
+        return $this->config->getSize();
     }
 
     /**

@@ -11,17 +11,14 @@ class UnsupportedHashingAlgorithm extends InvalidBloomFilterConfiguration
      * @param string $algorithm
      * @return UnsupportedHashingAlgorithm
      */
-    public static function algorithm(string $algorithm): self
+    public static function algorithm($algorithm): self
     {
-        return new static("Unsupported hashing algorithm: {$algorithm}.");
-    }
+        if ( ! is_string($algorithm) ) {
+            $type = gettype($algorithm);
 
-    /**
-     * @param string $type
-     * @return UnsupportedHashingAlgorithm
-     */
-    public static function type(string $type): self
-    {
-        return new static("Hashing algorithm must be specified as string, but [$type] was given");
+            return new static("Hashing algorithm must be specified as string, but [$type] was given");
+        }
+
+        return new static("Unsupported hashing algorithm: {$algorithm}.");
     }
 }

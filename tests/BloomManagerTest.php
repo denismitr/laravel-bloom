@@ -10,7 +10,7 @@ use Denismitr\Bloom\Exceptions\BloomServiceException;
 use Denismitr\Bloom\Exceptions\InvalidBloomFilterConfiguration;
 use Denismitr\Bloom\Exceptions\InvalidBloomFilterHashFunctionsNumber;
 use Denismitr\Bloom\Exceptions\InvalidBloomFilterSize;
-use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
+use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistence;
 use Denismitr\Bloom\Exceptions\UnsupportedHashingAlgorithm;
 use Denismitr\Bloom\Facades\Bloom;
 
@@ -112,7 +112,7 @@ class BloomManagerTest extends TestCase
             'hashing_algorithm' => 'md5',
         ]);
 
-        $this->expectException(UnsupportedBloomFilterPersistenceDriver::class);
+        $this->expectException(UnsupportedBloomFilterPersistence::class);
         $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage('Bloom filter persistence driver must be a string, but [NULL] was given.');
@@ -157,7 +157,7 @@ class BloomManagerTest extends TestCase
             'hashing_algorithm' => 'md5',
         ]);
 
-        $this->expectException(UnsupportedBloomFilterPersistenceDriver::class);
+        $this->expectException(UnsupportedBloomFilterPersistence::class);
         $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
         $this->expectExceptionMessage('Bloom filter persistence driver [mysql] is not supported.');
@@ -305,7 +305,7 @@ class BloomManagerTest extends TestCase
 
         $this->expectException(InvalidBloomFilterConfiguration::class);
         $this->expectException(BloomServiceException::class);
-        $this->expectExceptionMessage("Bloom filter configuration file [bloom.php] is empty, invalid or misplaced");
+        $this->expectExceptionMessage("Bloom filter configuration file [bloom.php] is empty, invalid or misplaced.");
 
         Bloom::key('any-key');
     }

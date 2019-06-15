@@ -6,7 +6,7 @@ namespace Denismitr\Bloom\Exceptions;
 
 class InvalidItemType extends BloomServiceException
 {
-    public static function item($item)
+    public static function item($item): self
     {
         $type = gettype($item);
 
