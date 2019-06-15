@@ -68,7 +68,21 @@ specified inside the `keys` section.
 you can use facade - `Denismitr\Bloom\Facades\Bloom` or just inject
 `Denismitr\Bloom\BloomManager` as dependency and it will be resolved by Laravel 
 
-##### Default configuration
+### Default configuration with DI
+```php
+public function someAction(Denismitr\Bloom\BloomManager $bloomManager)
+{
+    $bloomFilter = $bloomManager->key('foo');
+    
+    $bloomFilter->add('baz');
+    ...
+    $bloomFilter->test('baz'); // true
+    ...
+    $bloomFilter->clear(); // clear bloom filter under 'foo' key
+}
+```
+
+##### Default configuration with facade
 
 ```php
 Bloom::key("shown-banners")->add($banner->id);
