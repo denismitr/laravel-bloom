@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 
 namespace Denismitr\Bloom\Helpers;
 
 
 use Denismitr\Bloom\Contracts\Persister;
+use Denismitr\Bloom\Exceptions\InvalidBloomFilterSize;
 use Illuminate\Redis\Connections\Connection;
 
 final class PersisterRedisImpl implements Persister
@@ -17,12 +20,24 @@ final class PersisterRedisImpl implements Persister
     private $redis;
 
     /**
+     * @var int
+     */
+    private $capacity;
+
+    /**
      * PersisterRedisImpl constructor.
      * @param Connection $redis
+     * @param int $capacity
+     * @throws InvalidBloomFilterSize
      */
-    public function __construct(Connection $redis)
+    public function __construct(Connection $redis, int $capacity)
     {
+        if ($capacity > self::getMaxCapacity()) {
+            throw InvalidBloomFilterSize::max($capacity, self::getMaxCapacity());
+        }
+
         $this->redis = $redis;
+        $this->capacity = $capacity;
     }
 
     /**

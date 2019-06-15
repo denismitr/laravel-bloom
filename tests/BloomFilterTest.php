@@ -141,8 +141,10 @@ class BloomFilterTest extends TestCase
      * @param int|string $recommendationB
      * @throws \Denismitr\Bloom\Exceptions\InvalidItemType
      */
-    public function it_can_use_key_suffix_for_reset_as_well($userA, $userB, $recommendationA, $recommendationB)
+    public function it_can_use_key_suffix_with_murmur($userA, $userB, $recommendationA, $recommendationB)
     {
+        config()->set('bloom.default.hashing_algorithm', 'murmur');
+
         $bloomFilterA = Bloom::key('user-recommendations', $userA);
         $bloomFilterB = Bloom::key('user-recommendations', $userB);
 
@@ -154,12 +156,78 @@ class BloomFilterTest extends TestCase
 
         $this->assertFalse($bloomFilterA->test($recommendationB));
         $this->assertFalse($bloomFilterB->test($recommendationA));
+    }
+
+    /**
+     * @test
+     * @dataProvider keysWithSuffixesDataProvider
+     * @param int|string $userA
+     * @param int|string $userB
+     * @param int|string $recommendationA
+     * @param int|string $recommendationB
+     * @throws \Denismitr\Bloom\Exceptions\InvalidItemType
+     */
+    public function it_can_use_key_suffix_for_clear_command($userA, $userB, $recommendationA, $recommendationB)
+    {
+        $bloomFilterA = Bloom::key('user-recommendations', $userA);
+        $bloomFilterB = Bloom::key('user-recommendations', $userB);
+        $bloomFilterC = Bloom::key('some-other-key');
+
+        $bloomFilterA->add($recommendationA);
+        $bloomFilterB->add($recommendationB);
+        $bloomFilterC->add("some other stuff");
+
+        $this->assertTrue($bloomFilterA->test($recommendationA));
+        $this->assertTrue($bloomFilterB->test($recommendationB));
+        $this->assertTrue($bloomFilterC->test("some other stuff"));
+
+        $this->assertFalse($bloomFilterA->test($recommendationB));
+        $this->assertFalse($bloomFilterB->test($recommendationA));
 
         $bloomFilterA->clear();
-        $bloomFilterB->clear();
 
         $this->assertFalse($bloomFilterA->test($recommendationA));
-        $this->assertFalse($bloomFilterB->test($recommendationB));
+        $this->assertTrue($bloomFilterB->test($recommendationB));
+        $this->assertTrue($bloomFilterC->test("some other stuff"));
+
+        $this->assertFalse($bloomFilterA->test($recommendationB));
+        $this->assertFalse($bloomFilterB->test($recommendationA));
+    }
+
+    /**
+     * @test
+     * @dataProvider keysWithSuffixesDataProvider
+     * @param int|string $userA
+     * @param int|string $userB
+     * @param int|string $recommendationA
+     * @param int|string $recommendationB
+     * @throws \Denismitr\Bloom\Exceptions\InvalidItemType
+     */
+    public function it_can_use_key_suffix_for_clear_command_with_murmur_hash($userA, $userB, $recommendationA, $recommendationB)
+    {
+        config()->set('bloom.default.hashing_algorithm', 'murmur');
+
+        $bloomFilterA = Bloom::key('user-recommendations', $userA);
+        $bloomFilterB = Bloom::key('user-recommendations', $userB);
+        $bloomFilterC = Bloom::key('some-other-key');
+
+        $bloomFilterA->add($recommendationA);
+        $bloomFilterB->add($recommendationB);
+        $bloomFilterC->add("some other stuff");
+
+        $this->assertTrue($bloomFilterA->test($recommendationA));
+        $this->assertTrue($bloomFilterB->test($recommendationB));
+        $this->assertTrue($bloomFilterC->test("some other stuff"));
+
+        $this->assertFalse($bloomFilterA->test($recommendationB));
+        $this->assertFalse($bloomFilterB->test($recommendationA));
+
+        $bloomFilterA->clear();
+
+        $this->assertFalse($bloomFilterA->test($recommendationA));
+        $this->assertTrue($bloomFilterB->test($recommendationB));
+        $this->assertTrue($bloomFilterC->test("some other stuff"));
+
         $this->assertFalse($bloomFilterA->test($recommendationB));
         $this->assertFalse($bloomFilterB->test($recommendationA));
     }

@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 
 namespace Denismitr\Bloom;
 
 
 use Denismitr\Bloom\Contracts\{Persister};
 use Denismitr\Bloom\Exceptions\InvalidBloomFilterConfiguration;
-use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
+use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistence;
 use Denismitr\Bloom\Exceptions\UnsupportedHashingAlgorithm;
 use Denismitr\Bloom\Factories\HasherFactory;
 use Denismitr\Bloom\Factories\PersisterFactory;
+use Denismitr\Bloom\Config\KeySpecificConfig;
 use Denismitr\Bloom\Helpers\Indexer;
 use Illuminate\Config\Repository;
-use Illuminate\Support\Arr;
 
 /**
  * Class BloomManager
@@ -21,9 +23,9 @@ use Illuminate\Support\Arr;
 final class BloomManager
 {
     /**
-     * @var array
+     * @var KeySpecificConfig
      */
-    private $config;
+    private $bloomConfig;
 
     /**
      * @var PersisterFactory
@@ -48,18 +50,7 @@ final class BloomManager
         HasherFactory $hasherFactory
     )
     {
-        $bloomConfig = $config->get('bloom');
-
-        if (
-            ! is_array($bloomConfig)
-            || empty($bloomConfig)
-            || ! isset($bloomConfig['default'])
-            || ! isset($bloomConfig['keys'])
-        ) {
-            throw InvalidBloomFilterConfiguration::because("Bloom filter configuration file [bloom.php] is empty, invalid or misplaced");
-        }
-
-        $this->config = $bloomConfig;
+        $this->bloomConfig = $config->get('bloom');
         $this->persisterFactory = $persisterFactory;
         $this->hasherFactory = $hasherFactory;
     }
@@ -70,77 +61,65 @@ final class BloomManager
      * @return BloomFilter
      * @throws Exceptions\InvalidBloomFilterHashFunctionsNumber
      * @throws Exceptions\InvalidBloomFilterSize
-     * @throws UnsupportedBloomFilterPersistenceDriver
+     * @throws UnsupportedBloomFilterPersistence
      * @throws UnsupportedHashingAlgorithm
      * @throws InvalidBloomFilterConfiguration
      */
     public function key(string $key, ?string $keySuffix = null): BloomFilter
     {
-        $config = $this->resolveKeySpecificConfig($key);
+        $keySpecificConfig = KeySpecificConfig::of($key, $this->bloomConfig);
 
-        $indexer = $this->resolveIndexer($config);
-        $persister = $this->resolvePersister($config);
+        $indexer = $this->resolveIndexer($keySpecificConfig);
+        $persister = $this->resolvePersister($keySpecificConfig);
 
-        return $this->resolveBloomFilter($key, $keySuffix, $indexer, $persister);
+        return $this->resolveBloomFilter($key, $keySuffix, $keySpecificConfig, $indexer, $persister);
     }
 
     /**
      * @param string $key
      * @param string|null $keySuffix
+     * @param KeySpecificConfig $keySpecificConfig
      * @param Indexer $indexer
      * @param Persister $persister
      * @return BloomFilter
-     * @throws Exceptions\InvalidBloomFilterHashFunctionsNumber
-     * @throws Exceptions\InvalidBloomFilterSize
      */
     private function resolveBloomFilter(
         string $key,
         ?string $keySuffix,
+        KeySpecificConfig $keySpecificConfig,
         Indexer $indexer,
         Persister $persister
     ): BloomFilter
     {
-        $config = $this->resolveKeySpecificConfig($key);
-
         $key = $keySuffix ? $key.strval($keySuffix) : $key;
 
-        return new BloomFilter($key, $config, $indexer, $persister);
+        return new BloomFilter($key, $keySpecificConfig, $indexer, $persister);
     }
 
     /**
-     * @param array $config
+     * @param KeySpecificConfig $config
      * @return Indexer
      * @throws UnsupportedHashingAlgorithm
      */
-    private function resolveIndexer(array $config): Indexer
+    private function resolveIndexer(KeySpecificConfig $config): Indexer
     {
-        $algorithm = Arr::get($config, 'hashing_algorithm');
-
-        $hasher = $this->hasherFactory->make($algorithm);
-
-        return new Indexer($hasher);
+        return new Indexer(
+            $this->hasherFactory->make($config->getHashingAlgorithm())
+        );
     }
 
     /**
-     * @param array $config
+     * @param KeySpecificConfig $config
      * @return Persister
-     * @throws UnsupportedBloomFilterPersistenceDriver
      * @throws InvalidBloomFilterConfiguration
+     * @throws UnsupportedBloomFilterPersistence
      */
-    private function resolvePersister(array $config): Persister
+    private function resolvePersister(KeySpecificConfig $config): Persister
     {
-        $driver = Arr::get($config, 'persistence.driver');
-        $connection = Arr::get($config, 'persistence.connection', 'default');
-
-        return $this->persisterFactory->make($driver, $connection);
-    }
-
-    /**
-     * @param string $key
-     * @return array
-     */
-    private function resolveKeySpecificConfig(string $key): array
-    {
-        return Arr::get($this->config, "keys.{$key}", $this->config['default']);
+        return $this->persisterFactory->make(
+            $config->getPersistenceDriver(),
+            $config->getPersistenceConnection(),
+            $config->getSize()
+        );
     }
 }

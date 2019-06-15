@@ -26,11 +26,13 @@ class BloomServiceProvider extends ServiceProvider
 
     protected function registerBloomManager()
     {
-        $this->app->singleton('bloom.manager', function($app) {
+        $this->app->singleton(BloomManager::class, function($app) {
             $persisterFactory = new PersisterFactory();
             $hasherFactory = new HasherFactory();
 
             return new BloomManager($app['config'], $persisterFactory, $hasherFactory);
         });
+
+        $this->app->alias(BloomManager::class, 'bloom.manager');
     }
 }

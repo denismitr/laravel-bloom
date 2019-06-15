@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 
 namespace Denismitr\Bloom\Factories;
 
 
 use Denismitr\Bloom\Contracts\Persister;
 use Denismitr\Bloom\Exceptions\InvalidBloomFilterConfiguration;
-use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistenceDriver;
+use Denismitr\Bloom\Exceptions\UnsupportedBloomFilterPersistence;
 use Denismitr\Bloom\Helpers\PersisterRedisImpl;
 use Illuminate\Support\Facades\Redis;
 
@@ -17,16 +19,13 @@ class PersisterFactory
     /**
      * @param string $driver
      * @param string $connection
+     * @param int $capacity
      * @return Persister
-     * @throws UnsupportedBloomFilterPersistenceDriver
      * @throws InvalidBloomFilterConfiguration
+     * @throws UnsupportedBloomFilterPersistence
      */
-    public function make($driver, $connection): Persister
+    public function make(string $driver, string $connection, int $capacity): Persister
     {
-        if ( ! is_string($driver) ) {
-            throw UnsupportedBloomFilterPersistenceDriver::type( gettype($driver) );
-        }
-
         try {
             $conn= Redis::connection($connection);
         } catch (\InvalidArgumentException $e) {
@@ -35,9 +34,9 @@ class PersisterFactory
 
         switch(strtolower($driver)) {
             case self::REDIS_DRIVER:
-                return new PersisterRedisImpl($conn);
+                return new PersisterRedisImpl($conn, $capacity);
             default:
-                throw UnsupportedBloomFilterPersistenceDriver::driver($driver);
+                throw UnsupportedBloomFilterPersistence::driver($driver);
         }
     }
 }
