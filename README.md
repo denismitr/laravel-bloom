@@ -65,6 +65,8 @@ specified inside the `keys` section.
 
 
 ### Usage
+you can use facade - `Denismitr\Bloom\Facades\Bloom` or just inject
+`Denismitr\Bloom\BloomManager` as dependency and it will be resolved by Laravel 
 
 ##### Default configuration
 
